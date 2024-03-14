@@ -1,0 +1,13 @@
+.venv/*
+.DS_Store
+*.pyc
+build/*
+dist/*
+ccdefundamentals.egg-info/dependency_links.txt
+ccdefundamentals.egg-info/PKG-INFO
+ccdefundamentals.egg-info/requires.txt
+ccdefundamentals.egg-info/SOURCES.txt
+ccdefundamentals.egg-info/top_level.txt
+build/*
+.env
+settings.json
