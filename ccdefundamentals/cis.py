@@ -1,12 +1,15 @@
 from __future__ import annotations
 from pydantic import BaseModel, Field, ConfigDict
 import datetime as dt
-from typing import Optional
+from typing import Union, Optional
 from enum import Enum
 import io
 import base58
 from ccdefundamentals.GRPCClient import GRPCClient
 from ccdefundamentals.GRPCClient.CCD_Types import *  # noqa: F403
+from ccdefundamentals.mongodb import Collections
+from pymongo.collection import Collection
+from pymongo import ReplaceOne
 from ccdefundamentals.enums import NET
 from rich.console import Console
 
@@ -255,6 +258,403 @@ class CIS:
         self.instance_subindex = instance_subindex
         self.entrypoint = entrypoint
         self.net = net
+
+    ###############
+
+    def execute_save(self, collection: Collection, replacement, _id: str):
+        repl_dict = replacement.dict()
+        if "id" in repl_dict:
+            del repl_dict["id"]
+
+        # sort tokens and token_holders
+        if "tokens" in repl_dict:
+            sorted_tokens = list(repl_dict["tokens"].keys())
+            sorted_tokens.sort()
+            tokens_sorted = {i: repl_dict["tokens"][i] for i in sorted_tokens}
+            repl_dict["tokens"] = tokens_sorted
+
+        if "token_holders" in repl_dict:
+            sorted_holders = list(repl_dict["token_holders"].keys())
+            sorted_holders.sort()
+            token_holders_sorted = {
+                i: repl_dict["token_holders"][i] for i in sorted_holders
+            }
+            repl_dict["token_holders"] = token_holders_sorted
+
+        _ = collection.bulk_write(
+            [
+                ReplaceOne(
+                    {"_id": _id},
+                    replacement=repl_dict,
+                    upsert=True,
+                )
+            ]
+        )
+
+    def restore_state_for_token_address(
+        self,
+        db_to_use: dict[Collections, Collection],
+        token_address: str,
+    ):
+        d: dict = db_to_use[Collections.tokens_token_addresses].find_one(
+            {"_id": token_address}
+        )
+
+        d.update(
+            {
+                "token_amount": str(int(0)),  # mongo limitation on int size
+                "token_holders": {},  # {CCD_AccountAddress, str(token_amount)}
+                "last_height_processed": 0,
+            }
+        )
+
+        d = MongoTypeTokenAddress(**d)
+        self.execute_save(
+            db_to_use[Collections.tokens_token_addresses], d, token_address
+        )
+
+    def copy_token_holders_state_to_address_and_save(
+        self,
+        db_to_use: dict[Collections, Collection],
+        token_address_info: MongoTypeTokenAddress,
+        address: str,
+    ):
+        token_address = token_address_info.id
+        d = db_to_use[Collections.tokens_accounts].find_one({"_id": address})
+        # if this account doesn't have tokens, create empty dict.
+        if not d:
+            d = MongoTypeTokenHolderAddress(
+                **{
+                    "_id": address,
+                    "tokens": {},
+                }
+            )  # keyed on token_address
+        else:
+            d = MongoTypeTokenHolderAddress(**d)
+
+        token_to_save = MongoTypeTokenForAddress(
+            **{
+                "token_address": token_address,
+                "contract": token_address_info.contract,
+                "token_id": token_address_info.token_id,
+                "token_amount": str(token_address_info.token_holders.get(address, 0)),
+            }
+        )
+
+        d.tokens[token_address] = token_to_save
+
+        if token_to_save.token_amount == str(0):
+            del d.tokens[token_address]
+
+        self.execute_save(db_to_use[Collections.tokens_accounts], d, address)
+
+    def save_mint(
+        self,
+        db_to_use: dict[Collections, Collection],
+        instance_address: str,
+        result: mintEvent,
+        height: int,
+    ):
+        token_address = f"{instance_address}-{result.token_id}"
+        d = db_to_use[Collections.tokens_token_addresses].find_one(
+            {"_id": token_address}
+        )
+        if not d:
+            d = MongoTypeTokenAddress(
+                **{
+                    "_id": token_address,
+                    "contract": instance_address,
+                    "token_id": result.token_id,
+                    "token_amount": str(int(0)),  # mongo limitation on int size
+                    "token_holders": {},  # {CCD_AccountAddress, str(token_amount)}
+                    "last_height_processed": height,
+                }
+            )
+        else:
+            d = MongoTypeTokenAddress(**d)
+
+        token_holders: dict[CCD_AccountAddress, str] = d.token_holders  # noqa: F405
+        token_holders[result.to_address] = str(
+            int(token_holders.get(result.to_address, "0")) + result.token_amount
+        )
+        d.token_amount = str((int(d.token_amount) + result.token_amount))
+        d.token_holders = token_holders
+
+        self.execute_save(
+            db_to_use[Collections.tokens_token_addresses], d, token_address
+        )
+        self.copy_token_holders_state_to_address_and_save(
+            db_to_use, d, result.to_address
+        )
+
+    def save_metadata(
+        self,
+        db_to_use: dict[Collections, Collection],
+        instance_address: str,
+        result: tokenMetadataEvent,
+        height: int,
+    ):
+        token_address = f"{instance_address}-{result.token_id}"
+        d = db_to_use[Collections.tokens_token_addresses].find_one(
+            {"_id": token_address}
+        )
+        if not d:
+            d = MongoTypeTokenAddress(
+                **{
+                    "_id": token_address,
+                    "contract": instance_address,
+                    "token_id": result.token_id,
+                    "last_height_processed": height,
+                }
+            )
+        else:
+            d = MongoTypeTokenAddress(**d)
+
+        d.metadata_url = result.metadata.url
+
+        self.execute_save(
+            db_to_use[Collections.tokens_token_addresses], d, token_address
+        )
+
+    def save_operator(
+        self,
+        db_to_use: dict[Collections, Collection],
+        instance_address: str,
+        result: tokenMetadataEvent,
+        height: int,
+    ):
+        token_address = f"{instance_address}-{result.token_id}"
+        d = db_to_use[Collections.tokens_token_addresses].find_one(
+            {"_id": token_address}
+        )
+        if not d:
+            d = MongoTypeTokenAddress(
+                **{
+                    "_id": token_address,
+                    "contract": instance_address,
+                    "token_id": result.token_id,
+                    "last_height_processed": height,
+                }
+            )
+        else:
+            d = MongoTypeTokenAddress(**d)
+
+        d.metadata_url = result.metadata.url
+
+        self.execute_save(
+            db_to_use[Collections.tokens_token_addresses], d, token_address
+        )
+
+    def save_transfer(
+        self,
+        db_to_use: dict[Collections, Collection],
+        instance_address: str,
+        result: transferEvent,
+        height: int,
+    ):
+        token_address = f"{instance_address}-{result.token_id}"
+        d = db_to_use[Collections.tokens_token_addresses].find_one(
+            {"_id": token_address}
+        )
+        if not d:
+            return None
+
+        d = MongoTypeTokenAddress(**d)
+
+        try:
+            token_holders: dict[CCD_AccountAddress, str] = d.token_holders  # noqa: F405
+        except:  # noqa: E722
+            console.log(
+                f"{result.tag}: {token_address} | {d} has no field token_holders?"
+            )
+            Exception(
+                console.log(
+                    f"{result.tag}: {token_address} | {d} has no field token_holders?"
+                )
+            )
+
+        token_holders[result.to_address] = str(
+            int(token_holders.get(result.to_address, "0")) + result.token_amount
+        )
+        try:
+            token_holders[result.from_address] = str(
+                int(token_holders.get(result.from_address, None)) - result.token_amount
+            )
+            if int(token_holders[result.from_address]) >= 0:
+                d.token_holders = token_holders
+                d.last_height_processed = height
+                self.execute_save(
+                    db_to_use[Collections.tokens_token_addresses], d, token_address
+                )
+
+                self.copy_token_holders_state_to_address_and_save(
+                    db_to_use, d, result.from_address
+                )
+                self.copy_token_holders_state_to_address_and_save(
+                    db_to_use, d, result.to_address
+                )
+
+        except:  # noqa: E722
+            if result.token_amount > 0:
+                console.log(
+                    f"""{result.tag}: {result.from_address} is not listed 
+                    as token holder for {token_address}?"""
+                )
+
+    def save_burn(
+        self,
+        db_to_use: dict[Collections, Collection],
+        instance_address: str,
+        result: burnEvent,
+        height: int,
+    ):
+        token_address = f"{instance_address}-{result.token_id}"
+
+        d = MongoTypeTokenAddress(
+            **db_to_use[Collections.tokens_token_addresses].find_one(
+                {"_id": token_address}
+            )
+        )
+
+        token_holders: dict[CCD_AccountAddress, str] = d.token_holders  # noqa: F405
+        try:
+            token_holders[result.from_address] = str(
+                int(token_holders.get(result.from_address, "0")) - result.token_amount
+            )
+            if token_holders[result.from_address] == str(0):
+                del token_holders[result.from_address]
+
+            d.token_amount = str((int(d.token_amount) - result.token_amount))
+            d.token_holders = token_holders
+            d.last_height_processed = height
+
+            if int(d.token_amount) >= 0:
+                self.execute_save(
+                    db_to_use[Collections.tokens_token_addresses], d, token_address
+                )
+                self.copy_token_holders_state_to_address_and_save(
+                    db_to_use, d, result.from_address
+                )
+
+        except:  # noqa: E722
+            console.log(
+                f"""{result.tag}: {result.from_address} is not listed as 
+                token holder for {token_address}?"""
+            )
+            # exit
+
+    def save_logged_event(
+        self,
+        db_to_use,
+        tag_: int,
+        result: Union[
+            mintEvent, burnEvent, transferEvent, updateOperatorEvent, tokenMetadataEvent
+        ],
+        instance_address: str,
+        event: str,
+        height: int,
+        tx_hash: str,
+        tx_index: int,
+        ordering: int,
+        _id_postfix: str,
+    ) -> Union[ReplaceOne, None]:
+        if tag_ in [255, 254, 253, 252, 251, 250]:
+            if tag_ == 252:
+                token_address = f"{instance_address}-operator"
+            elif tag_ == 250:
+                token_address = f"{instance_address}-nonce"
+            else:
+                token_address = f"{instance_address}-{result.token_id}"
+            _id = f"{height}-{token_address}-{event}-{_id_postfix}"
+            if result:
+                result_dict = result.dict()
+            else:
+                result_dict = {}
+            if "token_amount" in result_dict:
+                result_dict["token_amount"] = str(result_dict["token_amount"])
+
+            d = {
+                "_id": _id,
+                "logged_event": event,
+                "result": result_dict,
+                "tag": tag_,
+                "event_type": LoggedEvents(tag_).name,
+                "block_height": height,
+                "tx_hash": tx_hash,
+                "tx_index": tx_index,
+                "ordering": ordering,
+                "token_address": token_address,
+                "contract": instance_address,
+            }
+            return ReplaceOne(
+                {"_id": _id},
+                replacement=d,
+                upsert=True,
+            )
+
+        else:
+            return None
+
+    # not used
+    def execute_logged_event(
+        self,
+        db_to_use,
+        tag_: int,
+        result: Union[mintEvent, burnEvent, transferEvent, tokenMetadataEvent],
+        instance_address: str,
+        height: int,
+    ):
+        if tag_ == 255:
+            self.save_transfer(db_to_use, instance_address, result, height)
+        elif tag_ == 254:
+            self.save_mint(db_to_use, instance_address, result, height)
+        elif tag_ == 253:
+            self.save_burn(db_to_use, instance_address, result, height)
+        elif tag_ == 252:
+            pass
+            # we only save the logged event, but to not process this in
+            # token_address or accounts.
+            # save_operator(db_to_use, instance_address, result, height)
+        elif tag_ == 251:
+            self.save_metadata(db_to_use, instance_address, result, height)
+        elif tag_ == 250:
+            pass  # nonceEvent
+
+    def process_event(
+        self,
+        db_to_use,
+        instance_address: str,
+        event: str,
+        height: int,
+        tx_hash: str,
+        tx_index: int,
+        ordering: int,
+        _id_postfix: str,
+    ):
+        tag_, result = self.process_log_events(event)
+        logged_event = None
+        token_address = None
+        if result:
+            # if tag_ in [255, 254, 253, 252, 251, 250]:
+            if tag_ in [255, 254, 253, 251]:
+                token_address = f"{instance_address}-{result.token_id}"
+
+                logged_event = self.save_logged_event(
+                    db_to_use,
+                    tag_,
+                    result,
+                    instance_address,
+                    event,
+                    height,
+                    tx_hash,
+                    tx_index,
+                    ordering,
+                    _id_postfix,
+                )
+
+        return tag_, logged_event, token_address
+
+    ###############
 
     def standard_identifier(self, identifier: StandardIdentifiers) -> bytes:
         si = io.BytesIO()
