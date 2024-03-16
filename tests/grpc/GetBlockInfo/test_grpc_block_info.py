@@ -1,6 +1,10 @@
 import pytest
 import datetime as dt
 import datetime
+import sys
+import os
+
+sys.path.append(os.path.dirname("ccdefundamentals"))
 from datetime import timezone
 from ccdefundamentals.GRPCClient import GRPCClient
 from ccdefundamentals.GRPCClient.CCD_Types import *

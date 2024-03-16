@@ -1,4 +1,8 @@
 import pytest
+import sys
+import os
+
+sys.path.append(os.path.dirname("ccdefundamentals"))
 from ccdefundamentals.GRPCClient import GRPCClient
 from rich import print
 from ccdefundamentals.enums import NET
@@ -7,6 +11,7 @@ from ccdefundamentals.cis import (
     registerCredentialEvent,
     revokeCredentialEvent,
     transferEvent,
+    tokenMetadataEvent,
 )
 
 
@@ -16,9 +21,15 @@ def grpcclient():
 
 
 def tx_at_index_from(
-    tx_index: int, block_hash: str, grpcclient: GRPCClient, net: NET = NET.MAINNET
+    tx_index: int,
+    block_hash: str,
+    grpcclient: GRPCClient,
+    net: NET = NET.MAINNET,
+    show_all: bool = False,
 ):
     block = grpcclient.get_block_transaction_events(block_hash, net)
+    if show_all:
+        return block.transaction_summaries
     if tx_index == -1:
         return None
     else:
@@ -75,3 +86,20 @@ def test_token_amount(grpcclient: GRPCClient):
     assert result.token_amount == 20162999394000755
     assert result.from_address == "4JafBcWeHt5K92EXyStUdzii5Jt32BSDiZ2EMAYcnYBtrAAePA"
     assert result.to_address == "<9363,0>"
+
+
+def test_checksum(grpcclient: GRPCClient):
+    block_hash = grpcclient.get_finalized_block_at_height(14189078, NET.MAINNET).hash
+    tx = tx_at_index_from(13, block_hash, grpcclient, NET.MAINNET, show_all=False)
+    # print(tx)
+    ci = CIS(grpcclient, 9403, 0, "", NET.MAINNET)
+
+    event = tx.account_transaction.effects.contract_update_issued.effects[0]
+    tag, result = ci.process_log_events(event.updated.events[1])
+    result: tokenMetadataEvent
+    assert tag == 251
+    assert (
+        result.token_id
+        == "01288764e78695027bd972e9b654cde28df2563e56b3ed66a4c8f4dcb3c08cec"
+    )
+    assert result.metadata.checksum is None

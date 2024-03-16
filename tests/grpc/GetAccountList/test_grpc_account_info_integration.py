@@ -1,5 +1,9 @@
 import pytest
 import datetime as dt
+import sys
+import os
+
+sys.path.append(os.path.dirname("ccdefundamentals"))
 from ccdefundamentals.GRPCClient import GRPCClient
 from rich import print
 from rich.progress import track

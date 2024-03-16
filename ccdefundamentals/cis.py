@@ -803,13 +803,14 @@ class CIS:
         elif t == 1:
             return bs.read(32)
         else:
-            raise Exception("invalid type")
+            # should not happen
+            return None
 
     def metadataUrl(self, bs: io.BytesIO):
         n = int.from_bytes(bs.read(2), byteorder="little")
         url = bs.read(n).decode()
-        # checksum = self.metadataChecksum(bs)
-        return MetadataUrl(**{"url": url, "checksum": None})
+        checksum = self.metadataChecksum(bs)
+        return MetadataUrl(**{"url": url, "checksum": checksum})
 
     def schema_ref(self, bs: io.BytesIO):
         n = int.from_bytes(bs.read(2), byteorder="little")

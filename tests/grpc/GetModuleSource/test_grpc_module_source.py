@@ -1,9 +1,13 @@
 import pytest
 import datetime as dt
+import sys
+import os
+
+sys.path.append(os.path.dirname("ccdefundamentals"))
 from ccdefundamentals.GRPCClient import GRPCClient
 from rich import print
 import io
-import cbor2
+
 import ccdefundamentals.GRPCClient.wadze as wadze
 
 

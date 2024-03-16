@@ -2,6 +2,10 @@
 
 import pytest
 import datetime as dt
+import sys
+import os
+
+sys.path.append(os.path.dirname("ccdefundamentals"))
 from ccdefundamentals.GRPCClient import GRPCClient
 import io
 from ccdefundamentals.cns import CNSDomain
