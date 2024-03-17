@@ -88,7 +88,7 @@ def test_token_amount(grpcclient: GRPCClient):
     assert result.to_address == "<9363,0>"
 
 
-def test_checksum(grpcclient: GRPCClient):
+def test_checksum_provenance(grpcclient: GRPCClient):
     block_hash = grpcclient.get_finalized_block_at_height(14189078, NET.MAINNET).hash
     tx = tx_at_index_from(13, block_hash, grpcclient, NET.MAINNET, show_all=False)
     # print(tx)
@@ -102,4 +102,52 @@ def test_checksum(grpcclient: GRPCClient):
         result.token_id
         == "01288764e78695027bd972e9b654cde28df2563e56b3ed66a4c8f4dcb3c08cec"
     )
+    assert result.metadata.checksum is None
+
+
+def test_checksum_aesirx(grpcclient: GRPCClient):
+    block_hash = grpcclient.get_finalized_block_at_height(14178624, NET.MAINNET).hash
+    tx = tx_at_index_from(0, block_hash, grpcclient, NET.MAINNET, show_all=False)
+    # print(tx)
+    ci = CIS(grpcclient, 8602, 0, "", NET.MAINNET)
+
+    event = tx.account_transaction.effects.contract_update_issued.effects[0]
+    tag, result = ci.process_log_events(event.updated.events[1])
+    result: tokenMetadataEvent
+    assert tag == 251
+    assert (
+        result.token_id
+        == "01288764e78695027bd972e9b654cde28df2563e56b3ed66a4c8f4dcb3c08cec"
+    )
+    assert result.metadata.checksum is None
+
+
+def test_checksum_other(grpcclient: GRPCClient):
+    block_hash = grpcclient.get_finalized_block_at_height(11788918, NET.TESTNET).hash
+    tx = tx_at_index_from(0, block_hash, grpcclient, NET.TESTNET, show_all=False)
+    # print(tx)
+    ci = CIS(grpcclient, 8364, 0, "", NET.MAINNET)
+
+    event = tx.account_transaction.effects.contract_update_issued.effects[0]
+    tag, result = ci.process_log_events(event.updated.events[1])
+    result: tokenMetadataEvent
+    assert tag == 251
+    assert (
+        result.token_id
+        == "01288764e78695027bd972e9b654cde28df2563e56b3ed66a4c8f4dcb3c08cec"
+    )
+    assert result.metadata.checksum is None
+
+
+def test_checksum_other2(grpcclient: GRPCClient):
+    block_hash = grpcclient.get_finalized_block_at_height(11950993, NET.TESTNET).hash
+    tx = tx_at_index_from(0, block_hash, grpcclient, NET.TESTNET, show_all=False)
+    # print(tx)
+    ci = CIS(grpcclient, 8416, 0, "", NET.MAINNET)
+
+    event = tx.account_transaction.effects.contract_update_issued.effects[0]
+    tag, result = ci.process_log_events(event.updated.events[1])
+    result: tokenMetadataEvent
+    assert tag == 251
+    assert result.token_id == "25"
     assert result.metadata.checksum is None
