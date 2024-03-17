@@ -11,3 +11,4 @@ ccdefundamentals.egg-info/top_level.txt
 build/*
 .env
 settings.json
+requirements.dev.txt
