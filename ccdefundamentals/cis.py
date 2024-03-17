@@ -801,10 +801,13 @@ class CIS:
         if t == 0:
             return None
         elif t == 1:
-            return bs.read(32)
+            try:
+                return bs.read(32).hex()
+            except:  # noqa: E722
+                return -1
         else:
             # should not happen
-            return None
+            return -2
 
     def metadataUrl(self, bs: io.BytesIO):
         n = int.from_bytes(bs.read(2), byteorder="little")
