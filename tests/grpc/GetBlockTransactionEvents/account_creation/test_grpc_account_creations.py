@@ -4,7 +4,7 @@ import sys
 import os
 
 sys.path.append(os.path.dirname("ccdefundamentals"))
-from ccdefundamentals.GRPCClient import GRPCClient
+from ccdexplorer_fundamentals.GRPCClient import GRPCClient
 
 
 @pytest.fixture

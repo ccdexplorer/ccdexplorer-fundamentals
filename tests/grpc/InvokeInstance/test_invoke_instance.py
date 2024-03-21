@@ -6,20 +6,20 @@ import sys
 import os
 
 sys.path.append(os.path.dirname("ccdefundamentals"))
-from ccdefundamentals.GRPCClient import GRPCClient
+from ccdexplorer_fundamentals.GRPCClient import GRPCClient
 import io
-from ccdefundamentals.cns import CNSDomain
-from ccdefundamentals.enums import NET
+from ccdexplorer_fundamentals.cns import CNSDomain
+from ccdexplorer_fundamentals.enums import NET
 import json
 import math
 
-# from ccdefundamentals.GRPCClient.queries import _SharedConverters
-from ccdefundamentals.GRPCClient.CCD_Types import *
-from ccdefundamentals.GRPCClient.types_pb2 import Empty
+# from ccdexplorer_fundamentals.GRPCClient.queries import _SharedConverters
+from ccdexplorer_fundamentals.GRPCClient.CCD_Types import *
+from ccdexplorer_fundamentals.GRPCClient.types_pb2 import Empty
 
 from rich import print
 
-from ccdefundamentals.cis import *
+from ccdexplorer_fundamentals.cis import *
 
 
 @pytest.fixture

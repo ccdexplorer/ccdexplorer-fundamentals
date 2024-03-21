@@ -5,10 +5,10 @@ import sys
 import os
 
 sys.path.append(os.path.dirname("ccdefundamentals"))
-from ccdefundamentals.GRPCClient import GRPCClient
-from ccdefundamentals.GRPCClient.CCD_Types import *
-from ccdefundamentals.enums import NET
-from ccdefundamentals.cis import CIS
+from ccdexplorer_fundamentals.GRPCClient import GRPCClient
+from ccdexplorer_fundamentals.GRPCClient.CCD_Types import *
+from ccdexplorer_fundamentals.enums import NET
+from ccdexplorer_fundamentals.cis import CIS
 from rich import print
 
 

@@ -5,14 +5,14 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 
 setup(
-    name="ccdefundamentals",
-    version="0.1.6",
+    name="ccdexplorer-fundamentals",
+    version="0.1.7",
     author="Sander de Ruiter",
     author_email="sdr@ccdexplorer.io",
     description="Shared code for CCDExplorer.io and its Notification Bot.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/ccdexplorer/ccdefundamentals",
+    url="https://github.com/ccdexplorer/ccdexplorer-fundamentals",
     project_urls={},
     license="Apache-2.0",
     packages=find_packages(),
@@ -31,5 +31,6 @@ setup(
         "apprise",
         "py-graphql-client",
         "chardet",
+        "pre-commit",
     ],
 )

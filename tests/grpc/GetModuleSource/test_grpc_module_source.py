@@ -4,11 +4,11 @@ import sys
 import os
 
 sys.path.append(os.path.dirname("ccdefundamentals"))
-from ccdefundamentals.GRPCClient import GRPCClient
+from ccdexplorer_fundamentals.GRPCClient import GRPCClient
 from rich import print
 import io
 
-import ccdefundamentals.GRPCClient.wadze as wadze
+import ccdexplorer_fundamentals.GRPCClient.wadze as wadze
 
 
 @pytest.fixture

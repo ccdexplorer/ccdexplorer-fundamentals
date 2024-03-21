@@ -18,3 +18,4 @@ grpcio
 # asyncio
 python-dotenv
 grpcio-tools
+jsonschema-markdown

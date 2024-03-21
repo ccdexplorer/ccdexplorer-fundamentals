@@ -3,11 +3,11 @@
 *.pyc
 build/*
 dist/*
-ccdefundamentals.egg-info/dependency_links.txt
-ccdefundamentals.egg-info/PKG-INFO
-ccdefundamentals.egg-info/requires.txt
-ccdefundamentals.egg-info/SOURCES.txt
-ccdefundamentals.egg-info/top_level.txt
+ccdexplorer_fundamentals.egg-info/dependency_links.txt
+ccdexplorer_fundamentals.egg-info/PKG-INFO
+ccdexplorer_fundamentals.egg-info/requires.txt
+ccdexplorer_fundamentals.egg-info/SOURCES.txt
+ccdexplorer_fundamentals.egg-info/top_level.txt
 build/*
 .env
 settings.json

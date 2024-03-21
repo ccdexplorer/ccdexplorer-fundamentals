@@ -1,0 +1,9 @@
+repos:
+  -   repo: local
+      hooks:
+      -   id: python-hook
+          name: python-hook
+          entry: python pydantic_schema_doc_generator.py
+          language: python
+          pass_filenames: false
+          additional_dependencies: [jsonschema_markdown, pydantic, grpc]
