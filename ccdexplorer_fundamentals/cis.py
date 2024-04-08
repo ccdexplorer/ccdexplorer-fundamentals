@@ -543,9 +543,9 @@ class CIS:
             )
             # exit
 
-    def save_logged_event(
+    def formulate_logged_event(
         self,
-        db_to_use,
+        slot_time: dt.datetime,
         tag_: int,
         result: Union[
             mintEvent, burnEvent, transferEvent, updateOperatorEvent, tokenMetadataEvent
@@ -567,7 +567,7 @@ class CIS:
                 token_address = f"{instance_address}-{result.token_id}"
             _id = f"{height}-{token_address}-{event}-{_id_postfix}"
             if result:
-                result_dict = result.dict()
+                result_dict = result.model_dump()
             else:
                 result_dict = {}
             if "token_amount" in result_dict:
@@ -585,15 +585,19 @@ class CIS:
                 "ordering": ordering,
                 "token_address": token_address,
                 "contract": instance_address,
+                "date": f"{slot_time:%Y-%m-%d}",
             }
-            return ReplaceOne(
-                {"_id": _id},
-                replacement=d,
-                upsert=True,
+            return (
+                MongoTypeLoggedEvent(**d),
+                ReplaceOne(
+                    {"_id": _id},
+                    replacement=d,
+                    upsert=True,
+                ),
             )
 
         else:
-            return None
+            return (None, None)
 
     # not used
     def execute_logged_event(
@@ -622,7 +626,7 @@ class CIS:
 
     def process_event(
         self,
-        db_to_use,
+        slot_time: dt.datetime,
         instance_address: str,
         event: str,
         height: int,
@@ -639,8 +643,8 @@ class CIS:
             if tag_ in [255, 254, 253, 251]:
                 token_address = f"{instance_address}-{result.token_id}"
 
-                logged_event = self.save_logged_event(
-                    db_to_use,
+                (logged_event, logged_event_for_queue) = self.formulate_logged_event(
+                    slot_time,
                     tag_,
                     result,
                     instance_address,
@@ -652,7 +656,7 @@ class CIS:
                     _id_postfix,
                 )
 
-        return tag_, logged_event, token_address
+        return tag_, logged_event, logged_event_for_queue, token_address
 
     ###############
 

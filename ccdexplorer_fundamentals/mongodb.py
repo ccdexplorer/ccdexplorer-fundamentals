@@ -1,31 +1,31 @@
 # ruff: noqa :E501, F405
+import datetime as dt
 from enum import Enum
-from ccdexplorer_fundamentals.mongodb_queries._search_transfers import (
-    Mixin as _search_transfers,
-)
-from ccdexplorer_fundamentals.mongodb_queries._subscriptions import (
-    Mixin as _subscriptions,
+from typing import Dict, Optional, Union
+
+import motor.motor_asyncio
+from motor.motor_asyncio import AsyncIOMotorCollection
+from pydantic import BaseModel, ConfigDict, Field
+from pymongo import MongoClient
+from pymongo.collection import Collection
+from rich.console import Console
+
+from ccdexplorer_fundamentals.env import MONGO_URI
+from ccdexplorer_fundamentals.GRPCClient.CCD_Types import *  # noqa: F403
+from ccdexplorer_fundamentals.mongodb_queries._apy_calculations import (
+    Mixin as _apy_calculations,
 )
 from ccdexplorer_fundamentals.mongodb_queries._baker_distributions import (
     Mixin as _distributions,
 )
-from ccdexplorer_fundamentals.mongodb_queries._store_block import Mixin as _store_block
-from ccdexplorer_fundamentals.mongodb_queries._apy_calculations import (
-    Mixin as _apy_calculations,
+from ccdexplorer_fundamentals.mongodb_queries._search_transfers import (
+    Mixin as _search_transfers,
 )
-from ccdexplorer_fundamentals.GRPCClient.CCD_Types import *  # noqa: F403
-from ccdexplorer_fundamentals.env import MONGO_URI
-import motor.motor_asyncio
-from motor.motor_asyncio import AsyncIOMotorCollection
-from pymongo import MongoClient
-from pymongo.collection import Collection
-
-from rich.console import Console
-from typing import Dict, Optional, Union
-from ccdexplorer_fundamentals.tooter import Tooter, TooterType, TooterChannel
-from pydantic import BaseModel, Field, ConfigDict
-import datetime as dt
-
+from ccdexplorer_fundamentals.mongodb_queries._store_block import Mixin as _store_block
+from ccdexplorer_fundamentals.mongodb_queries._subscriptions import (
+    Mixin as _subscriptions,
+)
+from ccdexplorer_fundamentals.tooter import Tooter, TooterChannel, TooterType
 
 console = Console()
 
@@ -73,6 +73,18 @@ class MongoImpactedAddress(BaseModel):
     block_height: int
     included_in_flow: Optional[bool] = None
     date: Optional[str] = None
+
+
+class MongoTokensImpactedAddress(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    id: str = Field(..., alias="_id")
+    tx_hash: str
+    impacted_address: str
+    impacted_address_canonical: str
+    event_type: str
+    token_address: str
+    block_height: int
+    date: str
 
 
 class MongoTypeBlockPerDay(BaseModel):
@@ -358,8 +370,10 @@ class Collections(Enum):
     pre_tokens_by_address = "pre_tokens_by_address"
     statistics = "statistics"
     pre_render = "pre_render"
+
     # addresses and contracts per net per usecase
     usecases = "usecases"
+    tokens_impacted_addresses = "tokens_impacted_addresses"
 
 
 class CollectionsUtilities(Enum):
