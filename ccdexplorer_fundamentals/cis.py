@@ -637,6 +637,7 @@ class CIS:
     ):
         tag_, result = self.process_log_events(event)
         logged_event = None
+        logged_event_for_queue = None
         token_address = None
         if result:
             # if tag_ in [255, 254, 253, 252, 251, 250]:
