@@ -374,6 +374,7 @@ class Collections(Enum):
     # addresses and contracts per net per usecase
     usecases = "usecases"
     tokens_impacted_addresses = "tokens_impacted_addresses"
+    schema_logged_events = "schema_logged_events"
 
 
 class CollectionsUtilities(Enum):

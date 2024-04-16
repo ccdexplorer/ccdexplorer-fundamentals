@@ -77,3 +77,28 @@ class Mixin(_SharedConverters):
                 result[key] = self.convertType(value)
 
         return CCD_VersionedModuleSource(**result)
+
+    def get_module_source_original_classes(
+        self: GRPCClient,
+        module_ref: CCD_ModuleRef,
+        block_hash: str,
+        net: Enum = NET.MAINNET,
+    ) -> VersionedModuleSource:
+        result = {}
+        moduleSourceRequest = self.generate_module_source_request_from(
+            module_ref, block_hash
+        )
+
+        grpc_return_value: VersionedModuleSource = self.stub_on_net(
+            net, "GetModuleSource", moduleSourceRequest
+        )
+
+        for field, value in grpc_return_value.ListFields():
+            key = field.name
+            if type(value) in [
+                VersionedModuleSource.ModuleSourceV0,
+                VersionedModuleSource.ModuleSourceV1,
+            ]:
+                result[key] = value
+
+        return VersionedModuleSource(**result)
