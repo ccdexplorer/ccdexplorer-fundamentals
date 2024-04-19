@@ -100,6 +100,7 @@ class MongoTypeTokensTag(BaseModel):
     logo_url: Optional[str] = None
     decimals: Optional[int] = None
     exchange_rate: Optional[float] = None
+    get_price_from: Optional[str] = None
     logged_events_count: Optional[int] = None
     owner: Optional[str] = None
     module_name: Optional[str] = None
