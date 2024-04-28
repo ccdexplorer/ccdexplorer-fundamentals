@@ -107,6 +107,7 @@ class MongoTypeTokensTag(BaseModel):
     token_type: Optional[str] = None
     display_name: Optional[str] = None
     tvl_for_token_in_usd: Optional[float] = None
+    token_tag_id: Optional[str] = None
 
 
 class FailedAttempt(BaseModel):
