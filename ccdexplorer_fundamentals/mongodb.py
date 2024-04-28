@@ -6,7 +6,7 @@ from typing import Dict, Optional, Union
 import motor.motor_asyncio
 from motor.motor_asyncio import AsyncIOMotorCollection
 from pydantic import BaseModel, ConfigDict, Field
-from pymongo import MongoClient
+from pymongo import MongoClient, ReadPreference
 from pymongo.collection import Collection
 from rich.console import Console
 
@@ -334,24 +334,19 @@ class Collections(Enum):
     special_events = "special_events"
     instances = "instances"
     modules = "modules"
-    messages = "messages"
     paydays = "paydays"
     paydays_performance = "paydays_performance"
     paydays_rewards = "paydays_rewards"
     paydays_apy_intermediate = "paydays_apy_intermediate"
     paydays_current_payday = "paydays_current_payday"
     paydays_helpers = "paydays_helpers"
-    involved_accounts_all = "involved_accounts_all"
-    involved_accounts_all_top_list = "involved_accounts_all_top_list"
     involved_accounts_transfer = "involved_accounts_transfer"
-    involved_contracts = "involved_contracts"
     nightly_accounts = "nightly_accounts"
     blocks_at_end_of_day = "blocks_at_end_of_day"
     blocks_per_day = "blocks_per_day"
     helpers = "helpers"
     memo_transaction_hashes = "memo_transaction_hashes"
     cns_domains = "cns_domains"
-    bot_messages = "bot_messages"
     dashboard_nodes = "dashboard_nodes"
     tokens_accounts = "tokens_accounts"
     tokens_links_v2 = "tokens_links_v2"
@@ -380,8 +375,6 @@ class Collections(Enum):
 class CollectionsUtilities(Enum):
     labeled_accounts = "labeled_accounts"
     labeled_accounts_metadata = "labeled_accounts_metadata"
-    users_prod = "users_prod"
-    users_dev = "users_dev"
     exchange_rates = "exchange_rates"
     exchange_rates_historical = "exchange_rates_historical"
     users_v2_prod = "users_v2_prod"
@@ -402,10 +395,13 @@ class MongoDB(
     _store_block,
     _apy_calculations,
 ):
-    def __init__(self, tooter: Tooter):
+    def __init__(self, tooter: Tooter, nearest: bool = False):
         self.tooter: Tooter = tooter
         try:
-            con = MongoClient(MONGO_URI)
+            if nearest:
+                con = MongoClient(MONGO_URI, read_preference=ReadPreference.NEAREST)
+            else:
+                con = MongoClient(MONGO_URI)
             self.connection: MongoClient = con
 
             self.mainnet_db = con["concordium_mainnet"]
@@ -445,10 +441,15 @@ class MongoMotor(
     _store_block,
     _apy_calculations,
 ):
-    def __init__(self, tooter: Tooter):
+    def __init__(self, tooter: Tooter, nearest: bool = False):
         self.tooter: Tooter = tooter
         try:
-            con = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
+            if nearest:
+                con = motor.motor_asyncio.AsyncIOMotorClient(
+                    MONGO_URI, read_preference=ReadPreference.NEAREST
+                )
+            else:
+                con = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
             self.connection = con
 
             self.mainnet_db = con["concordium_mainnet"]
