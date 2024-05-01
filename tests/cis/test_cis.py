@@ -2,22 +2,33 @@ import pytest
 import sys
 import os
 
-sys.path.append(os.path.dirname("ccdefundamentals"))
+
+sys.path.append(os.path.dirname("ccdexplorer_fundamentals"))
 from ccdexplorer_fundamentals.GRPCClient import GRPCClient
 from rich import print
 from ccdexplorer_fundamentals.enums import NET
+from ccdexplorer_fundamentals.mongodb import MongoDB, Collections
+from ccdexplorer_schema_parser.Schema import Schema
 from ccdexplorer_fundamentals.cis import (
     CIS,
     registerCredentialEvent,
     revokeCredentialEvent,
     transferEvent,
     tokenMetadataEvent,
+    itemCreatedEvent,
+    itemStatusChangedEvent,
 )
+from ccdexplorer_fundamentals.GRPCClient.CCD_Types import CCD_ContractAddress
 
 
 @pytest.fixture
 def grpcclient():
     return GRPCClient()
+
+
+@pytest.fixture
+def mongodb():
+    return MongoDB(tooter=None)
 
 
 def tx_at_index_from(
@@ -151,3 +162,85 @@ def test_checksum_other2(grpcclient: GRPCClient):
     assert tag == 251
     assert result.token_id == "25"
     assert result.metadata.checksum is None
+
+
+def get_schema_from_source(
+    contract_address: CCD_ContractAddress,
+    mongodb: MongoDB,
+    grpcclient: GRPCClient,
+    net: NET,
+):
+    result = mongodb.testnet[Collections.instances].find_one(
+        {"_id": contract_address.to_str()}
+    )
+    module_ref = (
+        result["v1"]["source_module"]
+        if result.get("v1")
+        else result["v0"]["source_module"]
+    )
+    source_module_name = (
+        result["v1"]["name"][5:] if result.get("v1") else result["v0"]["name"][5:]
+    )
+    ms = grpcclient.get_module_source_original_classes(
+        module_ref, "last_final", net=net
+    )
+    schema = Schema(ms.v1.value, 1) if ms.v1 else Schema(ms.v0.value, 0)
+
+    return schema, source_module_name
+
+
+def test_cis_6_create_item(
+    grpcclient: GRPCClient,
+    mongodb: MongoDB,
+):
+    net = NET.TESTNET
+    block_hash = grpcclient.get_finalized_block_at_height(13753259, net).hash
+    tx = tx_at_index_from(0, block_hash, grpcclient, net)
+    # print(tx)
+    contract_address = CCD_ContractAddress(index=8901, subindex=0)
+    schema, source_module_name = get_schema_from_source(
+        contract_address, mongodb, grpcclient, net
+    )
+    ci = CIS(grpcclient, contract_address.index, contract_address.subindex, "", net)
+
+    event = tx.account_transaction.effects.contract_update_issued.effects[0]
+    tag, result = ci.process_tnt_log_event(event.updated.events[0])
+
+    if tag == 237:
+        event_json = schema.event_to_json(
+            source_module_name,
+            bytes.fromhex(event.updated.events[0]),
+        )
+
+        result: itemCreatedEvent
+        result.initial_status = list(
+            event_json["ItemCreated"][0]["initial_status"].keys()
+        )[0]
+    print(result)
+
+
+def test_cis_6_status_changed_item(grpcclient: GRPCClient, mongodb: MongoDB):
+    net = NET.TESTNET
+    block_hash = grpcclient.get_finalized_block_at_height(13757068, net).hash
+    tx = tx_at_index_from(0, block_hash, grpcclient, net)
+    # print(tx)
+    contract_address = CCD_ContractAddress(index=8901, subindex=0)
+    schema, source_module_name = get_schema_from_source(
+        contract_address, mongodb, grpcclient, net
+    )
+    ci = CIS(grpcclient, contract_address.index, contract_address.subindex, "", net)
+
+    event = tx.account_transaction.effects.contract_update_issued.effects[0]
+    tag, result = ci.process_tnt_log_event(event.updated.events[0])
+
+    if tag == 236:
+        event_json = schema.event_to_json(
+            source_module_name,
+            bytes.fromhex(event.updated.events[0]),
+        )
+
+        result: itemStatusChangedEvent
+        result.new_status = list(
+            event_json["ItemStatusChanged"][0]["new_status"].keys()
+        )[0]
+    print(result)

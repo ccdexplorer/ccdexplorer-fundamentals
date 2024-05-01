@@ -139,6 +139,8 @@ class StandardIdentifiers(Enum):
     CIS_2 = "CIS-2"
     CIS_3 = "CIS-3"
     CIS_4 = "CIS-4"
+    CIS_5 = "CIS-5"
+    CIS_6 = "CIS-6"
 
 
 class LoggedEvents(Enum):
@@ -238,6 +240,20 @@ class tokenMetadataEvent(BaseModel):
     tag: int
     token_id: str
     metadata: MetadataUrl
+
+
+class itemCreatedEvent(BaseModel):
+    tag: int
+    item_id: str
+    metadata: MetadataUrl
+    initial_status: str
+
+
+class itemStatusChangedEvent(BaseModel):
+    tag: int
+    item_id: str
+    new_status: str
+    additional_data: bytes
 
 
 class nonceEvent(BaseModel):
@@ -705,7 +721,7 @@ class CIS:
     def supports_response(self, res: bytes):
         bs = io.BytesIO(bytes.fromhex(res.decode()))
         if bs.getbuffer().nbytes > 0:
-            n = int.from_bytes(bs.read(2), byteorder="big")
+            n = int.from_bytes(bs.read(2), byteorder="little")
             responses = []
             for _ in range(n):
                 responses.append(self.support_result(bs))
@@ -969,6 +985,13 @@ class CIS:
     def token_id(self, bs: io.BytesIO):
         n = int.from_bytes(bs.read(1), byteorder="little")
         return bytes.hex(bs.read(n))
+
+    def item_id(self, bs: io.BytesIO):
+        n = int.from_bytes(bs.read(1), byteorder="little")
+        return bytes.hex(bs.read(n))
+
+    def status(self, bs: io.BytesIO):
+        return bytes.hex(bs.read(1))
 
     def nonce(self, bs: io.BytesIO):
         return bytes.hex(bs.read(8))
@@ -1245,6 +1268,61 @@ class CIS:
                 "action": action,
             }
         )
+
+    def ItemCreatedEvent(self, hexParameter: str):
+        bs = io.BytesIO(bytes.fromhex(hexParameter))
+
+        tag_ = int.from_bytes(bs.read(1), byteorder="little")
+
+        item_id_ = self.item_id(bs)
+        metadata_ = self.metadataUrl(bs)
+        initial_status_ = self.status(bs)
+
+        return itemCreatedEvent(
+            **{
+                "tag": tag_,
+                "item_id": item_id_,
+                "metadata": metadata_,
+                "initial_status": initial_status_,
+            }
+        )
+
+    def ItemStatusChangedEvent(self, hexParameter: str):
+        bs = io.BytesIO(bytes.fromhex(hexParameter))
+
+        tag_ = int.from_bytes(bs.read(1), byteorder="little")
+
+        item_id_ = self.item_id(bs)
+        new_status_ = self.status(bs)
+        additional_data_ = self.additionalData(bs)
+
+        return itemStatusChangedEvent(
+            **{
+                "tag": tag_,
+                "item_id": item_id_,
+                "new_status": new_status_,
+                "additional_data": additional_data_,
+            }
+        )
+
+    def process_tnt_log_event(self, hexParameter: str):
+        bs = io.BytesIO(bytes.fromhex(hexParameter))
+
+        tag_ = int.from_bytes(bs.read(1), byteorder="little")
+        if tag_ == 237:
+            try:
+                event = self.ItemCreatedEvent(hexParameter)
+                return tag_, event
+            except:  # noqa: E722
+                return tag_, None
+        elif tag_ == 236:
+            try:
+                event = self.ItemStatusChangedEvent(hexParameter)
+                return tag_, event
+            except:  # noqa: E722
+                return tag_, None
+        else:
+            return tag_, f"Custom even with tag={tag_}."
 
     def process_log_events(self, hexParameter: str):
         bs = io.BytesIO(bytes.fromhex(hexParameter))
