@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ccdexplorer_fundamentals.GRPCClient import GRPCClient
 
-sys.path.append(os.path.dirname("ccdefundamentals"))
+sys.path.append(os.path.dirname("ccdexplorer_fundamentals"))
 from ccdexplorer_fundamentals.GRPCClient.CCD_Types import *
 
 

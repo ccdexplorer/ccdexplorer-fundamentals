@@ -6,7 +6,7 @@ from pydantic import BaseModel
 import jsonschema_markdown
 
 
-sys.path.append(os.path.dirname("ccdefundamentals"))
+sys.path.append(os.path.dirname("ccdexplorer_fundamentals"))
 from ccdexplorer_fundamentals.GRPCClient.CCD_Types import *
 from ccdexplorer_fundamentals.cis import *
 from ccdexplorer_fundamentals.mongodb import *

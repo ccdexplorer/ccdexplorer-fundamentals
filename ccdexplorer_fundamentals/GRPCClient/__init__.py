@@ -4,7 +4,7 @@ import sys
 import os
 
 
-sys.path.append(os.path.dirname("ccdefundamentals"))
+sys.path.append(os.path.dirname("ccdexplorer_fundamentals"))
 from ccdexplorer_fundamentals.GRPCClient.service_pb2_grpc import QueriesStub
 from ccdexplorer_fundamentals.env import GRPC_MAINNET, GRPC_TESTNET
 

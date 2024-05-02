@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 import os
 import sys
 
-sys.path.append(os.path.dirname("ccdefundamentals"))
+sys.path.append(os.path.dirname("ccdexplorer_fundamentals"))
 from ccdexplorer_fundamentals.GRPCClient.CCD_Types import *
 from google.protobuf.json_format import MessageToDict
 

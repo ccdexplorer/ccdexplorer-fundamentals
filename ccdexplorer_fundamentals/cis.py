@@ -156,6 +156,8 @@ class LoggedEvents(Enum):
     credential_metadata_event = 246
     credential_schemaref_event = 245
     recovation_key_event = 244
+    item_created_event = 237
+    item_status_changed = 236
 
 
 # CIS-2 Logged Event Types
@@ -253,7 +255,7 @@ class itemStatusChangedEvent(BaseModel):
     tag: int
     item_id: str
     new_status: str
-    additional_data: bytes
+    additional_data: str
 
 
 class nonceEvent(BaseModel):
@@ -850,8 +852,7 @@ class CIS:
 
     def additionalData(self, bs: io.BytesIO):
         n = int.from_bytes(bs.read(2), byteorder="little")
-        data = bs.read(n)
-        return data
+        return bytes.hex(bs.read(n))
 
     def tokenID(self, bs: io.BytesIO):
         n = int.from_bytes(bs.read(1), byteorder="little")

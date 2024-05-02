@@ -14,7 +14,7 @@ import os
 import sys
 from rich import print
 
-sys.path.append(os.path.dirname("ccdefundamentals"))
+sys.path.append(os.path.dirname("ccdexplorer_fundamentals"))
 from ccdexplorer_fundamentals.GRPCClient.CCD_Types import *
 
 

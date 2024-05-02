@@ -1,25 +1,26 @@
 # ruff: noqa :E501, F403, F405
 
-import pytest
 import datetime as dt
-import sys
 import os
+import sys
 
-sys.path.append(os.path.dirname("ccdefundamentals"))
-from ccdexplorer_fundamentals.GRPCClient import GRPCClient
+import pytest
+
+sys.path.append(os.path.dirname("ccdexplorer_fundamentals"))
 import io
-from ccdexplorer_fundamentals.cns import CNSDomain
-from ccdexplorer_fundamentals.enums import NET
 import json
 import math
+
+from rich import print
+
+from ccdexplorer_fundamentals.cis import StandardIdentifiers, CIS, LoggedEvents
+from ccdexplorer_fundamentals.cns import CNSDomain
+from ccdexplorer_fundamentals.enums import NET
+from ccdexplorer_fundamentals.GRPCClient import GRPCClient
 
 # from ccdexplorer_fundamentals.GRPCClient.queries import _SharedConverters
 from ccdexplorer_fundamentals.GRPCClient.CCD_Types import *
 from ccdexplorer_fundamentals.GRPCClient.types_pb2 import Empty
-
-from rich import print
-
-from ccdexplorer_fundamentals.cis import *
 
 
 @pytest.fixture
@@ -258,7 +259,10 @@ def test_invoke_instance_supports_MOTODEX(grpcclient: GRPCClient):
     entrypoint = "MOTODEX.supports"
 
     ci = CIS(grpcclient, instance_index, instance_subindex, entrypoint, NET.TESTNET)
+    # print(list(StandardIdentifiers))
+    # print(list(LoggedEvents))
     for ss in StandardIdentifiers:
+        print(f"{ss.value}")
         parameter_bytes = ci.supports_parameter(ss)
 
         ii = grpcclient.invoke_instance(
@@ -270,9 +274,19 @@ def test_invoke_instance_supports_MOTODEX(grpcclient: GRPCClient):
         )
         res = ii.success.return_value
         lookup_result, support_result = ci.supports_response(res)
-        print(f"{ss.value}: {support_result}")
+        print(f"{ss.value}: {lookup_result} | {support_result}")
 
     # print(ii.dict(exclude_none=True))
+
+
+def test_invoke_instance_supports_CIS_6(grpcclient: GRPCClient):
+    block_hash = "last_final"
+    instance_index = 8901
+    instance_subindex = 0
+    entrypoint = "track_and_trace.supports"
+
+    ci = CIS(grpcclient, instance_index, instance_subindex, entrypoint, NET.TESTNET)
+    print(ci.supports_standard(StandardIdentifiers.CIS_6))
 
 
 def test_invoke_instance_supports_MOTODEX_clean(grpcclient: GRPCClient):
@@ -283,8 +297,8 @@ def test_invoke_instance_supports_MOTODEX_clean(grpcclient: GRPCClient):
     # entrypoint = "Climafi-Carbon-CIS2.supports"
 
     ci = CIS(grpcclient, instance_index, instance_subindex, entrypoint, NET.TESTNET)
-    print(ci.supports_standard(StandardIdentifiers.CIS_2))
-    # print(ii.dict(exclude_none=True))
+    supports_cis_6 = ci.supports_standard(StandardIdentifiers.CIS_2)
+    print(supports_cis_6)
 
 
 def test_invoke_instance_supports_50(grpcclient: GRPCClient):

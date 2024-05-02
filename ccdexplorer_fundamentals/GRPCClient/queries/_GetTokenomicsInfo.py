@@ -9,7 +9,7 @@ from ccdexplorer_fundamentals.GRPCClient.queries._SharedConverters import (
 import os
 import sys
 
-sys.path.append(os.path.dirname("ccdefundamentals"))
+sys.path.append(os.path.dirname("ccdexplorer_fundamentals"))
 from ccdexplorer_fundamentals.GRPCClient.CCD_Types import *
 from typing import TYPE_CHECKING
 
