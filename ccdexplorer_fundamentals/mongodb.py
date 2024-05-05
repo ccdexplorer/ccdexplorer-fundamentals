@@ -367,6 +367,7 @@ class Collections(Enum):
     pre_render = "pre_render"
 
     # addresses and contracts per net per usecase
+    projects = "projects"
     usecases = "usecases"
     tokens_impacted_addresses = "tokens_impacted_addresses"
     tnt_logged_events = "tnt_logged_events"
@@ -384,6 +385,7 @@ class CollectionsUtilities(Enum):
     release_notes = "release_notes"
     token_api_translations = "token_api_translations"
     # use case management
+    projects = "projects"
     usecases = "usecases"
     helpers = "helpers"
 

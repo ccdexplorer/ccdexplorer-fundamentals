@@ -197,7 +197,7 @@ No description provided for this model.
 
 ### Type: `string`
 
-**Possible Values:** `blocks` or `transactions` or `special_events` or `instances` or `modules` or `messages` or `paydays` or `paydays_performance` or `paydays_rewards` or `paydays_apy_intermediate` or `paydays_current_payday` or `paydays_helpers` or `involved_accounts_all` or `involved_accounts_all_top_list` or `involved_accounts_transfer` or `involved_contracts` or `nightly_accounts` or `blocks_at_end_of_day` or `blocks_per_day` or `helpers` or `memo_transaction_hashes` or `cns_domains` or `bot_messages` or `dashboard_nodes` or `tokens_accounts` or `tokens_links_v2` or `tokens_token_addresses_v2` or `tokens_tags` or `tokens_logged_events` or `tokens_token_addresses` or `memos_to_hashes` or `credentials_issuers` or `impacted_addresses` or `impacted_addresses_pre_payday` or `impacted_addresses_all_top_list` or `pre_tokens_overview` or `pre_addresses_by_contract_count` or `pre_tokens_by_address` or `statistics` or `pre_render` or `usecases`
+**Possible Values:** `blocks` or `transactions` or `special_events` or `instances` or `modules` or `paydays` or `paydays_performance` or `paydays_rewards` or `paydays_apy_intermediate` or `paydays_current_payday` or `paydays_helpers` or `involved_accounts_transfer` or `nightly_accounts` or `blocks_at_end_of_day` or `blocks_per_day` or `helpers` or `memo_transaction_hashes` or `cns_domains` or `dashboard_nodes` or `tokens_accounts` or `tokens_links_v2` or `tokens_token_addresses_v2` or `tokens_tags` or `tokens_logged_events` or `tokens_token_addresses` or `memos_to_hashes` or `credentials_issuers` or `impacted_addresses` or `impacted_addresses_pre_payday` or `impacted_addresses_all_top_list` or `pre_tokens_overview` or `pre_addresses_by_contract_count` or `pre_tokens_by_address` or `statistics` or `pre_render` or `projects` or `usecases` or `tokens_impacted_addresses` or `tnt_logged_events`
 
 
 
@@ -207,7 +207,7 @@ No description provided for this model.
 
 ### Type: `string`
 
-**Possible Values:** `labeled_accounts` or `labeled_accounts_metadata` or `users_prod` or `users_dev` or `exchange_rates` or `exchange_rates_historical` or `users_v2_prod` or `users_v2_dev` or `message_log` or `preferences_explanations` or `release_notes` or `token_api_translations` or `usecases` or `helpers`
+**Possible Values:** `labeled_accounts` or `labeled_accounts_metadata` or `exchange_rates` or `exchange_rates_historical` or `users_v2_prod` or `users_v2_dev` or `message_log` or `preferences_explanations` or `release_notes` or `token_api_translations` or `projects` or `usecases` or `helpers`
 
 
 
@@ -362,7 +362,7 @@ Involved Account. This type is stored in the collections `involved_accounts_all`
 | _id | `string` | ✅ | string|  |  |  | |
 | sender | `string` | ✅ | string|  |  |  | |
 | sender_canonical | `string` | ✅ | string|  |  |  | |
-| type | `string` | ✅ | string|  |  |  | |
+| type | `object` | ✅ | object|  |  |  | |
 | block_height | `integer` | ✅ | integer|  |  |  | |
 | receiver | `string` |  | string|  |  |  | |
 | receiver_canonical | `string` |  | string|  |  |  | |
@@ -391,7 +391,7 @@ Involved Contract. This type is stored in the collection `involved_contracts`.
 | index | `integer` | ✅ | integer|  |  |  | |
 | subindex | `integer` | ✅ | integer|  |  |  | |
 | contract | `string` | ✅ | string|  |  |  | |
-| type | `string` | ✅ | string|  |  |  | |
+| type | `object` | ✅ | object|  |  |  | |
 | block_height | `integer` | ✅ | integer|  |  |  | |
 | source_module | `string` | ✅ | string|  |  |  | |
 
@@ -473,9 +473,9 @@ is a list of bakers, retrieved using the hash of the first block
 | hash_for_last_block | `string` | ✅ | string|  |  |  | |
 | payday_duration_in_seconds | `number` | ✅ | number|  |  |  | |
 | payday_block_slot_time | `string` | ✅ | Format: `date-time`|  |  |  | |
-| bakers_with_delegation_information | `array` | ✅ | array|  |  |  | |
-| baker_account_ids | `string` | ✅ | string|  |  |  | |
-| pool_status_for_bakers | `array` |  | array|  |  |  | |
+| bakers_with_delegation_information | `object` | ✅ | object|  |  |  | |
+| baker_account_ids | `object` | ✅ | object|  |  |  | |
+| pool_status_for_bakers | `object` |  | object|  |  |  | |
 
 
 ## MongoTypePaydayAPYIntermediate
@@ -570,7 +570,7 @@ No description provided for this model.
 | last_height_processed | `integer` | ✅ | integer|  |  |  | |
 | token_amount | `string` |  | string|  |  |  | |
 | metadata_url | `string` |  | string|  |  |  | |
-| token_holders | `string` |  | string|  |  |  | |
+| token_holders | `object` |  | object|  |  |  | |
 | tag_information | `object` |  | [MongoTypeTokensTag](#mongotypetokenstag)|  |  |  | |
 | exchange_rate | `number` |  | number|  |  |  | |
 | domain_name | `string` |  | string|  |  |  | |
@@ -635,12 +635,14 @@ No description provided for this model.
 | logo_url | `string` |  | string|  |  |  | |
 | decimals | `integer` |  | integer|  |  |  | |
 | exchange_rate | `number` |  | number|  |  |  | |
+| get_price_from | `string` |  | string|  |  |  | |
 | logged_events_count | `integer` |  | integer|  |  |  | |
 | owner | `string` |  | string|  |  |  | |
 | module_name | `string` |  | string|  |  |  | |
 | token_type | `string` |  | string|  |  |  | |
 | display_name | `string` |  | string|  |  |  | |
 | tvl_for_token_in_usd | `number` |  | number|  |  |  | |
+| token_tag_id | `string` |  | string|  |  |  | |
 
 
 ## TokenAttribute

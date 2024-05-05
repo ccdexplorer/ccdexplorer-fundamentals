@@ -1114,7 +1114,7 @@ No description provided for this model.
 | prf | `string` | ✅ | string|  |  |  | |
 | cred_counter | `string` | ✅ | string|  |  |  | |
 | max_accounts | `string` | ✅ | string|  |  |  | |
-| attributes | `string` | ✅ | string|  |  |  | |
+| attributes | `object` | ✅ | object|  |  |  | |
 | id_cred_sec_sharing_coeff | `array` | ✅ | string|  |  |  | |
 
 
@@ -1712,7 +1712,7 @@ No description provided for this model.
 | -------- | ---- | -------- | --------------- | ---------- | ------- | ----------- | --------
 | created_at | `object` | ✅ | [CCD_YearMonth](#ccd_yearmonth)|  |  |  | |
 | valid_to | `object` | ✅ | [CCD_YearMonth](#ccd_yearmonth)|  |  |  | |
-| attributes | `string` | ✅ | string|  |  |  | |
+| attributes | `object` | ✅ | object|  |  |  | |
 
 
 ## CCD_PoolInfo

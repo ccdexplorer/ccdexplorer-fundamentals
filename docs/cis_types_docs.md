@@ -33,7 +33,7 @@ No description provided for this model.
 
 ### Type: `integer`
 
-**Possible Values:** `255` or `254` or `253` or `252` or `251` or `250` or `249` or `248` or `247` or `246` or `245` or `244`
+**Possible Values:** `255` or `254` or `253` or `252` or `251` or `250` or `249` or `248` or `247` or `246` or `245` or `244` or `237` or `236`
 
 
 
@@ -67,7 +67,7 @@ No description provided for this model.
 
 ### Type: `string`
 
-**Possible Values:** `CIS-0` or `CIS-1` or `CIS-2` or `CIS-3` or `CIS-4`
+**Possible Values:** `CIS-0` or `CIS-1` or `CIS-2` or `CIS-3` or `CIS-4` or `CIS-5` or `CIS-6`
 
 
 
