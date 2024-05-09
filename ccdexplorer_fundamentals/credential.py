@@ -16,6 +16,7 @@ class CredentialElement(Enum):
     idDocExpiresAt = "ID Valid to"
     nationalIdNo = "National ID number"
     taxIdNo = "Tax ID number"
+    lei = "Legal Entity ID"
 
 
 class CredentialDocType(Enum):
@@ -39,12 +40,14 @@ class Credentials:
         Input to this method is the output from the node.
         """
         credentials = []
-        for key, v in ac.items():
+        for key_policy, v in ac.items():
             v: CCD_AccountCredential  # noqa: F405
             if v.initial:
                 v = v.initial
+                normal = False
             elif v.normal:
                 v = v.normal
+                normal = True
 
             c = {
                 "ip_identity": v.ip_id,
@@ -52,9 +55,25 @@ class Credentials:
                 "valid_to": v.policy.valid_to,
             }
             if len(v.policy.attributes.keys()) > 0:
-                for key, revealedAttribute in v.policy.attributes.items():
-                    value = revealedAttribute
-                    c.update({CredentialElement[key].value: value})
+                policy_attributes = []
+                for key_policy, commitmentAttribute in v.policy.attributes.items():
+                    value = commitmentAttribute
+                    policy_attributes.append(
+                        {"key": CredentialElement[key_policy].value, "value": value}
+                    )
+                c.update({"policy_attributes": policy_attributes})
+            if normal:
+                if len(v.commitments.attributes.keys()) > 0:
+                    commitment_attributes = []
+                    for (
+                        key_commitment,
+                        commitmentAttribute,
+                    ) in v.commitments.attributes.items():
+                        value = commitmentAttribute
+                        commitment_attributes.append(
+                            CredentialElement[key_commitment].value
+                        )
+                    c.update({"commitment_attributes": commitment_attributes})
             credentials.append(c)
         return credentials
 
