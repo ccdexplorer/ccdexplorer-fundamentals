@@ -127,3 +127,11 @@ def test_tx_account_info_weird(grpcclient: GRPCClient):
     ai = grpcclient.get_account_info(block_hash, hex_address=account)
     print(ai)
     assert ai.address == "2wkEiDDDhWLset4GT4TPVutLArbvKfTsP7VYhhA776aTmvHcNB"
+
+
+def test_tx_account_info_credential_lei(grpcclient: GRPCClient):
+    account = "38BkoGvD3EPiChHjWJ55Do6zSn8QugJFhGyhdB9ybowSqPi8Ta"
+    block_hash = "last_final"
+    ai = grpcclient.get_account_info(block_hash, hex_address=account)
+    print(ai)
+    assert ai.address == "38BkoGvD3EPiChHjWJ55Do6zSn8QugJFhGyhdB9ybowSqPi8Ta"

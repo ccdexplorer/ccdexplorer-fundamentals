@@ -31,6 +31,7 @@ class CredentialElement(Enum):
     idDocExpiresAt = 10
     nationalIdNo = 11
     taxIdNo = 12
+    lei = 13
 
 
 class CredentialDocType(Enum):
