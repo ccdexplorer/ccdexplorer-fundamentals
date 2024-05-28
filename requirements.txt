@@ -14,8 +14,9 @@ py-graphql-client
 chardet
 pytest
 grpcio
-# aiohttp
+aiohttp
 # asyncio
 python-dotenv
 grpcio-tools
 jsonschema-markdown
+pytest-asyncio

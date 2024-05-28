@@ -1,15 +1,18 @@
 from enum import Enum
+
+import aiohttp
+import requests
+
 from ccdexplorer_fundamentals.env import (
     ADMIN_CHAT_ID,
+    API_TOKEN,
+    BRANCH,
+    ENVIRONMENT,
+    FASTMAIL_TOKEN,
     MAILTO_LINK,
     MAILTO_USER,
     NOTIFIER_API_TOKEN,
-    API_TOKEN,
-    FASTMAIL_TOKEN,
-    BRANCH,
-    ENVIRONMENT,
 )
-import requests
 
 
 class TooterType(Enum):
@@ -34,6 +37,7 @@ class Tooter:
         self.BOT_API_TOKEN = API_TOKEN
         self.FASTMAIL_TOKEN = FASTMAIL_TOKEN
         self.url = "https://tooter.ccdexplorer.io/notify/"
+        self.plain_url = "https://tooter.ccdexplorer.io"
         self.email_part_1 = MAILTO_LINK
         self.email_part_2 = f"""&user={MAILTO_USER}&pass={FASTMAIL_TOKEN}&from=CCDExplorer Bot<bot@ccdexplorer.io>"""
 
@@ -75,6 +79,35 @@ Please visit your <a href='https://ccdexplorer.io/settings/user/overview'>accoun
             "format": "html",
         }
         _ = requests.post(self.url, json=payload)
+
+    async def async_relay(
+        self,
+        channel: TooterChannel,
+        body: str,
+        notifier_type: TooterType,
+        title: str,
+        chat_id: int = None,
+    ):
+        API_TO_USE = (
+            self.BOT_API_TOKEN
+            if channel == TooterChannel.BOT
+            else self.NOTIFIER_API_TOKEN
+        )
+        chat_id = ADMIN_CHAT_ID if channel == TooterChannel.NOTIFIER else chat_id
+        payload = {
+            "urls": f"tgram://{API_TO_USE}/{chat_id}",
+            "title": f"{title}<br/>",
+            "body": body,
+            "format": "html",
+        }
+        async with aiohttp.ClientSession(self.plain_url) as session:
+            async with session.post("/notify", json=payload) as response:
+                if response.status != 200:
+                    print(
+                        f"Error sending notification to {chat_id}. Status code= {response.status}."
+                    )
+                else:
+                    pass
 
     def send(
         self,
