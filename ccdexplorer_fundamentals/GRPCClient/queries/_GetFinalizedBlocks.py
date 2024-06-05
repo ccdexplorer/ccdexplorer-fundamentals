@@ -33,7 +33,7 @@ class Mixin(_SharedConverters):
         self.check_connection(net, sys._getframe().f_code.co_name)
         if net == NET.MAINNET:
             for block in self.stub_mainnet.GetFinalizedBlocks(request=Empty()):
-                print(self.convertFinalizedBlock(block))
+                return self.convertFinalizedBlock(block)
         else:
             for block in self.stub_testnet.GetFinalizedBlocks(request=Empty()):
-                print(self.convertFinalizedBlock(block))
+                return self.convertFinalizedBlock(block)
