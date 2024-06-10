@@ -609,14 +609,18 @@ class CCD_AccountTransactionEffects(BaseModel):
     encrypted_amount_transferred: Optional[
         CCD_AccountTransactionEffects_EncryptedAmountTransferred
     ] = None
-    transferred_to_encrypted: CCD_EncryptedSelfAmountAddedEvent = None
-    transferred_to_public: CCD_AccountTransactionEffects_TransferredToPublic = None
-    transferred_with_schedule: CCD_TransferredWithSchedule = None
-    credential_keys_updated: CCD_CredentialRegistrationId = None
-    credentials_updated: CCD_AccountTransactionEffects_CredentialsUpdated = None
-    data_registered: CCD_RegisteredData = None
-    baker_configured: CCD_BakerConfigured = None
-    delegation_configured: CCD_DelegationConfigured = None
+    transferred_to_encrypted: Optional[CCD_EncryptedSelfAmountAddedEvent] = None
+    transferred_to_public: Optional[
+        CCD_AccountTransactionEffects_TransferredToPublic
+    ] = None
+    transferred_with_schedule: Optional[CCD_TransferredWithSchedule] = None
+    credential_keys_updated: Optional[CCD_CredentialRegistrationId] = None
+    credentials_updated: Optional[CCD_AccountTransactionEffects_CredentialsUpdated] = (
+        None
+    )
+    data_registered: Optional[CCD_RegisteredData] = None
+    baker_configured: Optional[CCD_BakerConfigured] = None
+    delegation_configured: Optional[CCD_DelegationConfigured] = None
 
 
 class CCD_AccountTransactionDetails(BaseModel):
@@ -824,7 +828,7 @@ class CCD_UpdatePayload(BaseModel):
 
 
 class CCD_UpdateDetails(BaseModel):
-    effective_time: CCD_TransactionTime = None
+    effective_time: Optional[CCD_TransactionTime] = None
     payload: CCD_UpdatePayload
 
 
@@ -836,13 +840,13 @@ class CCD_ShortBlockInfo(BaseModel):
 
 class CCD_BlockItemSummary(BaseModel):
     index: int = 0
-    energy_cost: int = None
+    energy_cost: Optional[int] = None
     hash: CCD_TransactionHash
-    type: CCD_TransactionType = None
-    account_transaction: CCD_AccountTransactionDetails = None
-    account_creation: CCD_AccountCreationDetails = None
-    update: CCD_UpdateDetails = None
-    block_info: CCD_ShortBlockInfo = None
+    type: Optional[CCD_TransactionType] = None
+    account_transaction: Optional[CCD_AccountTransactionDetails] = None
+    account_creation: Optional[CCD_AccountCreationDetails] = None
+    update: Optional[CCD_UpdateDetails] = None
+    block_info: Optional[CCD_ShortBlockInfo] = None
 
 
 class CCD_Block(BaseModel):
@@ -957,15 +961,15 @@ class CCD_NormalCredentialValues(BaseModel):
 
 
 class CCD_AccountCredential(BaseModel):
-    initial: CCD_InitialCredentialValues = None
-    normal: CCD_NormalCredentialValues = None
+    initial: Optional[CCD_InitialCredentialValues] = None
+    normal: Optional[CCD_NormalCredentialValues] = None
 
 
 class CCD_EncryptedBalance(BaseModel):
     self_amount: CCD_EncryptedAmount
     start_index: int
     aggregated_amount: CCD_EncryptedAmount = None
-    num_aggregated: int = None
+    num_aggregated: Optional[int] = None
     incoming_amounts: list[CCD_EncryptedAmount]
 
 
@@ -1036,7 +1040,7 @@ class CCD_BlocksAtHeightResponse(BaseModel):
 
 
 class CCD_BlockSpecialEvent_PaydayPoolReward(BaseModel):
-    pool_owner: CCD_BakerId = None
+    pool_owner: Optional[CCD_BakerId] = None
     transaction_fees: microCCD
     baker_reward: microCCD
     finalization_reward: microCCD
@@ -1101,38 +1105,40 @@ class CCD_BlockSpecialEvent_Mint(BaseModel):
 
 
 class CCD_BlockSpecialEvent(BaseModel):
-    baking_rewards: CCD_BlockSpecialEvent_BakingRewards = None
-    mint: CCD_BlockSpecialEvent_Mint = None
-    finalization_rewards: CCD_BlockSpecialEvent_FinalizationRewards = None
-    block_reward: CCD_BlockSpecialEvent_BlockReward = None
-    payday_foundation_reward: CCD_BlockSpecialEvent_PaydayFoundationReward = None
-    payday_account_reward: CCD_BlockSpecialEvent_PaydayAccountReward = None
-    block_accrue_reward: CCD_BlockSpecialEvent_BlockAccrueReward = None
-    payday_pool_reward: CCD_BlockSpecialEvent_PaydayPoolReward = None
+    baking_rewards: Optional[CCD_BlockSpecialEvent_BakingRewards] = None
+    mint: Optional[CCD_BlockSpecialEvent_Mint] = None
+    finalization_rewards: Optional[CCD_BlockSpecialEvent_FinalizationRewards] = None
+    block_reward: Optional[CCD_BlockSpecialEvent_BlockReward] = None
+    payday_foundation_reward: Optional[CCD_BlockSpecialEvent_PaydayFoundationReward] = (
+        None
+    )
+    payday_account_reward: Optional[CCD_BlockSpecialEvent_PaydayAccountReward] = None
+    block_accrue_reward: Optional[CCD_BlockSpecialEvent_BlockAccrueReward] = None
+    payday_pool_reward: Optional[CCD_BlockSpecialEvent_PaydayPoolReward] = None
 
 
 class CCD_PendingUpdate(BaseModel):
     effective_time: CCD_TransactionTime
-    root_keys: CCD_HigherLevelKeys = None
-    level1_keys: CCD_HigherLevelKeys = None
-    level2_keys_cpc_0: CCD_AuthorizationsV0 = None
-    level2_keys_cpc_1: CCD_AuthorizationsV1 = None
-    protocol: CCD_ProtocolUpdate = None
-    election_difficulty: CCD_ElectionDifficulty = None
-    euro_per_energy: CCD_ExchangeRate = None
-    micro_ccd_per_euro: CCD_ExchangeRate = None
-    foundation_account: CCD_AccountAddress = None
-    mint_distribution_cpv_0: CCD_MintDistributionCpv0 = None
-    mint_distribution_cpv_1: CCD_MintDistributionCpv1 = None
-    transaction_fee_distribution: CCD_TransactionFeeDistribution = None
+    root_keys: Optional[CCD_HigherLevelKeys] = None
+    level1_keys: Optional[CCD_HigherLevelKeys] = None
+    level2_keys_cpc_0: Optional[CCD_AuthorizationsV0] = None
+    level2_keys_cpc_1: Optional[CCD_AuthorizationsV1] = None
+    protocol: Optional[CCD_ProtocolUpdate] = None
+    election_difficulty: Optional[CCD_ElectionDifficulty] = None
+    euro_per_energy: Optional[CCD_ExchangeRate] = None
+    micro_ccd_per_euro: Optional[CCD_ExchangeRate] = None
+    foundation_account: Optional[CCD_AccountAddress] = None
+    mint_distribution_cpv_0: Optional[CCD_MintDistributionCpv0] = None
+    mint_distribution_cpv_1: Optional[CCD_MintDistributionCpv1] = None
+    transaction_fee_distribution: Optional[CCD_TransactionFeeDistribution] = None
     gas_rewards: CCD_GasRewards
-    pool_parameters_cpv_0: CCD_BakerStakeThreshold = None
-    pool_parameters_cpv_0: CCD_PoolParametersCpv1 = None
-    add_anonymity_revoker: CCD_ArInfo = None
-    add_identity_provider: CCD_IpInfo = None
-    cooldown_parameters: CCD_CooldownParametersCpv1 = None
-    pool_parameters_cpv_1_update: CCD_PoolParametersCpv1 = None
-    time_parameters: CCD_TimeParametersCpv1 = None
+    pool_parameters_cpv_0: Optional[CCD_BakerStakeThreshold] = None
+    pool_parameters_cpv_1: Optional[CCD_PoolParametersCpv1] = None
+    add_anonymity_revoker: Optional[CCD_ArInfo] = None
+    add_identity_provider: Optional[CCD_IpInfo] = None
+    cooldown_parameters: Optional[CCD_CooldownParametersCpv1] = None
+    pool_parameters_cpv_1_update: Optional[CCD_PoolParametersCpv1] = None
+    time_parameters: Optional[CCD_TimeParametersCpv1] = None
 
 
 class CCD_ElectionInfo_Baker(BaseModel):
@@ -1142,7 +1148,7 @@ class CCD_ElectionInfo_Baker(BaseModel):
 
 
 class CCD_ElectionInfo(BaseModel):
-    election_difficulty: CCD_ElectionDifficulty = None
+    election_difficulty: Optional[CCD_ElectionDifficulty] = None
     election_nonce: CCD_LeadershipElectionNonce
     baker_election_info: list[CCD_ElectionInfo_Baker]
 
@@ -1151,42 +1157,42 @@ class CCD_ConsensusInfo(BaseModel):
     best_block: CCD_BlockHash
     genesis_block: CCD_BlockHash
     genesis_time: CCD_TimeStamp
-    slot_duration: CCD_Duration = None
+    slot_duration: Optional[CCD_Duration] = None
     epoch_duration: CCD_Duration
     last_finalized_block: CCD_BlockHash
     best_block_height: int
     last_finalized_block_height: int
     blocks_received_count: int
-    block_last_received_time: CCD_TimeStamp = None
+    block_last_received_time: Optional[CCD_TimeStamp] = None
     block_receive_latency_ema: float
     block_receive_latency_emsd: float
-    block_receive_period_ema: float = None
-    block_receive_period_emsd: float = None
+    block_receive_period_ema: Optional[float] = None
+    block_receive_period_emsd: Optional[float] = None
     blocks_verified_count: int
-    block_last_arrived_time: CCD_TimeStamp = None
+    block_last_arrived_time: Optional[CCD_TimeStamp] = None
     block_arrive_latency_ema: float
     block_arrive_latency_emsd: float
-    block_arrive_period_ema: float = None
-    block_arrive_period_emsd: float = None
+    block_arrive_period_ema: Optional[float] = None
+    block_arrive_period_emsd: Optional[float] = None
     transactions_per_block_ema: float
     transactions_per_block_emsd: float
     finalization_count: int
-    last_finalized_time: CCD_TimeStamp = None
-    finalization_period_ema: float = None
-    finalization_period_emsd: float = None
+    last_finalized_time: Optional[CCD_TimeStamp] = None
+    finalization_period_ema: Optional[float] = None
+    finalization_period_emsd: Optional[float] = None
     protocol_version: str
     genesis_index: int
     current_era_genesis_block: CCD_BlockHash
     current_era_genesis_time: CCD_TimeStamp
-    current_timeout_duration: CCD_Duration = None
-    current_round: CCD_Round = None
-    current_epoch: CCD_Epoch = None
-    trigger_block_time: CCD_TimeStamp = None
+    current_timeout_duration: Optional[CCD_Duration] = None
+    current_round: Optional[CCD_Round] = None
+    current_epoch: Optional[int] = None
+    trigger_block_time: Optional[CCD_TimeStamp] = None
 
 
 class CCD_VersionedModuleSource(BaseModel):
-    v0: CCD_VersionedModuleSource_ModuleSourceV0 = None
-    v1: CCD_VersionedModuleSource_ModuleSourceV1 = None
+    v0: Optional[CCD_VersionedModuleSource_ModuleSourceV0] = None
+    v1: Optional[CCD_VersionedModuleSource_ModuleSourceV1] = None
 
 
 class CCD_ChainParametersV0(BaseModel):
@@ -1259,9 +1265,9 @@ class CCD_ChainParametersV2(BaseModel):
 
 
 class CCD_ChainParameters(BaseModel):
-    v0: CCD_ChainParametersV0 = None
-    v1: CCD_ChainParametersV1 = None
-    v2: CCD_ChainParametersV2 = None
+    v0: Optional[CCD_ChainParametersV0] = None
+    v1: Optional[CCD_ChainParametersV1] = None
+    v2: Optional[CCD_ChainParametersV2] = None
 
 
 class CCD_InvokeInstanceResponse_Success(BaseModel):
@@ -1289,4 +1295,4 @@ class CCD_BlockComplete(BaseModel):
     # logged_events: Optional[list[MongoTypeLoggedEvent]] = None
     logged_events: Optional[list] = None
 
-    net: str = None
+    net: Optional[str] = None
