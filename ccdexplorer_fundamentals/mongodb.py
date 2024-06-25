@@ -1,11 +1,9 @@
 # ruff: noqa :E501, F405
-import datetime as dt
-from enum import Enum
-from typing import Dict, Optional, Union
+from typing import Dict, Union
 
 import motor.motor_asyncio
 from motor.motor_asyncio import AsyncIOMotorCollection
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
 from pymongo import MongoClient, ReadPreference
 from pymongo.collection import Collection
 from rich.console import Console
@@ -179,6 +177,7 @@ class MongoTypeModule(BaseModel):
     methods: Optional[list[str]] = None
     contracts: Optional[list[str]] = None
     init_date: Optional[dt.datetime] = None
+    verification_status: Optional[bool] = False
 
 
 class MongoTypeInstance(BaseModel):
