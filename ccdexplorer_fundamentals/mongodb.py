@@ -371,6 +371,7 @@ class Collections(Enum):
     usecases = "usecases"
     tokens_impacted_addresses = "tokens_impacted_addresses"
     tnt_logged_events = "tnt_logged_events"
+    queue_todo = "queue_todo"
 
 
 class CollectionsUtilities(Enum):
