@@ -840,6 +840,17 @@ class Mixin(Protocol):
 
         return CCD_ContractTraceElement_Transferred(**result)
 
+    def convertInstanceUpgradedEvent(
+        self, message
+    ) -> CCD_ContractTraceElement_Upgraded:
+        result = {}
+        for descriptor in message.DESCRIPTOR.fields:
+            key, value = self.get_key_value_from_descriptor(descriptor, message)
+            if type(value) in self.simple_types:
+                result[key] = self.convertType(value)
+
+        return CCD_ContractTraceElement_Upgraded(**result)
+
     def convertUpdateEvents(self, message) -> list:
         events = []
         for entry in message:
@@ -861,6 +872,8 @@ class Mixin(Protocol):
                     if type(value) == ContractTraceElement.Transferred:
                         entry_dict[key] = self.convertInstanceTransferredEvent(value)
 
+                    if type(value) == ContractTraceElement.Upgraded:
+                        entry_dict[key] = self.convertInstanceUpgradedEvent(value)
                 if entry_dict == {}:
                     pass
                 else:

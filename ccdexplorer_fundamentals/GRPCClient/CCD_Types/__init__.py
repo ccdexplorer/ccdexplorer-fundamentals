@@ -1,5 +1,5 @@
 # ruff: noqa: F403, F405, E402
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import datetime as dt
 from enum import Enum
 from typing import Optional
@@ -398,11 +398,18 @@ class CCD_ContractTraceElement_Transferred(BaseModel):
     receiver: CCD_AccountAddress
 
 
+class CCD_ContractTraceElement_Upgraded(BaseModel):
+    address: CCD_ContractAddress
+    from_module: CCD_ModuleRef = Field(..., alias="from")
+    to_module: CCD_ModuleRef = Field(..., alias="to")
+
+
 class CCD_ContractTraceElement(BaseModel):
     updated: Optional[CCD_InstanceUpdatedEvent] = None
     transferred: Optional[CCD_ContractTraceElement_Transferred] = None
     interrupted: Optional[CCD_ContractTraceElement_Interrupted] = None
     resumed: Optional[CCD_ContractTraceElement_Resumed] = None
+    upgraded: Optional[CCD_ContractTraceElement_Upgraded] = None
 
 
 class CCD_ContractUpdateIssued(BaseModel):

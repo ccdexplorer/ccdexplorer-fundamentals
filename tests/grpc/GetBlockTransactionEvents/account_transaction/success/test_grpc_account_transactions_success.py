@@ -679,3 +679,27 @@ def test_tx_update_fin_parameters(grpcclient: GRPCClient):
     #     ].baker_set_finalization_reward_commission.finalization_reward_commission
     #     == 1
     # )
+
+
+def test_tx_instance_migration(grpcclient: GRPCClient):
+    block_hash = grpcclient.get_finalized_block_at_height(16094108, NET.MAINNET).hash
+    tx = tx_at_index_from(6, block_hash, grpcclient, NET.MAINNET)
+    # print(tx)
+    assert (
+        tx.account_transaction.effects.contract_update_issued.effects[
+            2
+        ].upgraded.address.index
+        == 9459
+    )
+    assert (
+        tx.account_transaction.effects.contract_update_issued.effects[
+            2
+        ].upgraded.from_module
+        == "efc4ea2b19330518131b67b0b66ac6f628438bfd740d694fcf64a13412bf327b"
+    )
+    assert (
+        tx.account_transaction.effects.contract_update_issued.effects[
+            2
+        ].upgraded.to_module
+        == "fc9e9fdb728c4657891390f58dcb91070f10b93d6b9928cae7cb18823466cd44"
+    )
