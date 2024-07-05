@@ -195,6 +195,7 @@ class MongoTypeInstance(BaseModel):
     id: str = Field(..., alias="_id")
     v0: Optional[CCD_InstanceInfo_V0] = None  # noqa: F405
     v1: Optional[CCD_InstanceInfo_V1] = None  # noqa: F405
+    source_module: Optional[str] = None
 
 
 class MongoTypeReward(BaseModel):

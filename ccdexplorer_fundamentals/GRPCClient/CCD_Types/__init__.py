@@ -1,5 +1,5 @@
 # ruff: noqa: F403, F405, E402
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 import datetime as dt
 from enum import Enum
 from typing import Optional
@@ -399,6 +399,7 @@ class CCD_ContractTraceElement_Transferred(BaseModel):
 
 
 class CCD_ContractTraceElement_Upgraded(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
     address: CCD_ContractAddress
     from_module: CCD_ModuleRef = Field(..., alias="from")
     to_module: CCD_ModuleRef = Field(..., alias="to")
