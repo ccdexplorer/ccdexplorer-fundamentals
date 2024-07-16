@@ -135,3 +135,11 @@ def test_tx_account_info_credential_lei(grpcclient: GRPCClient):
     ai = grpcclient.get_account_info(block_hash, hex_address=account)
     print(ai)
     assert ai.address == "38BkoGvD3EPiChHjWJ55Do6zSn8QugJFhGyhdB9ybowSqPi8Ta"
+
+
+def test_tx_account_info_corporate_account(grpcclient: GRPCClient):
+    account = "36bpBdY5PPqSMTBSSsbey6Xb9GpabrU86XtpyE5y8n8p8NzW8Z"
+    block_hash = "last_final"
+    ai = grpcclient.get_account_info(block_hash, hex_address=account, net=NET.TESTNET)
+    print(ai)
+    # assert ai.address == "38BkoGvD3EPiChHjWJ55Do6zSn8QugJFhGyhdB9ybowSqPi8Ta"

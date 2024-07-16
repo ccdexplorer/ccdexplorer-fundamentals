@@ -32,6 +32,10 @@ class CredentialElement(Enum):
     nationalIdNo = 11
     taxIdNo = 12
     lei = 13
+    legalName = 14
+    legalJurisdictionCountry = 15
+    businessNumber = 16
+    registrationAuthority = 17
 
 
 class CredentialDocType(Enum):
