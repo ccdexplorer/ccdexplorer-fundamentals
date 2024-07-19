@@ -58,6 +58,9 @@ class Credentials:
                 "created_at": v.policy.created_at,
                 "valid_to": v.policy.valid_to,
             }
+            if normal:
+                c.update({"cred_id": v.cred_id})
+
             if len(v.policy.attributes.keys()) > 0:
                 policy_attributes = []
                 for key_policy, commitmentAttribute in v.policy.attributes.items():
