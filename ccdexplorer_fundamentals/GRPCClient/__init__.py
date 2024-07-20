@@ -104,9 +104,10 @@ from ccdexplorer_fundamentals.GRPCClient.queries._GetBakerEarliestWinTime import
 from ccdexplorer_fundamentals.GRPCClient.queries._CheckHealth import (
     Mixin as _CheckHealth,
 )
-from ccdexplorer_fundamentals.GRPCClient.queries._SendBlockItem import (
-    Mixin as _SendBlockItem,
-)
+
+# from ccdexplorer_fundamentals.GRPCClient.queries._SendBlockItem import (
+#     Mixin as _SendBlockItem,
+# )
 
 
 class GRPCClient(
@@ -138,7 +139,7 @@ class GRPCClient(
     _GetConsensusInfo,
     _GetBakerEarliestWinTime,
     _CheckHealth,
-    _SendBlockItem,
+    # _SendBlockItem,
 ):
     def __init__(self, net: str = "mainnet"):
         self.net = NET(net)
