@@ -37,6 +37,9 @@ from ccdexplorer_fundamentals.GRPCClient.queries._GetBakerList import (
 from ccdexplorer_fundamentals.GRPCClient.queries._GetBlocksAtHeight import (
     Mixin as _GetBlocksAtHeight,
 )
+from ccdexplorer_fundamentals.GRPCClient.queries._GetBlocks import (
+    Mixin as _GetBlocks,
+)
 from ccdexplorer_fundamentals.GRPCClient.queries._GetFinalizedBlocks import (
     Mixin as _GetFinalizedBlocks,
 )
@@ -101,6 +104,9 @@ from ccdexplorer_fundamentals.GRPCClient.queries._GetBakerEarliestWinTime import
 from ccdexplorer_fundamentals.GRPCClient.queries._CheckHealth import (
     Mixin as _CheckHealth,
 )
+from ccdexplorer_fundamentals.GRPCClient.queries._SendBlockItem import (
+    Mixin as _SendBlockItem,
+)
 
 
 class GRPCClient(
@@ -109,6 +115,7 @@ class GRPCClient(
     _GetBakerList,
     _GetInstanceInfo,
     _GetInstanceList,
+    _GetBlocks,
     _GetFinalizedBlocks,
     _GetBlocksAtHeight,
     _GetIdentityProviders,
@@ -131,6 +138,7 @@ class GRPCClient(
     _GetConsensusInfo,
     _GetBakerEarliestWinTime,
     _CheckHealth,
+    _SendBlockItem,
 ):
     def __init__(self, net: str = "mainnet"):
         self.net = NET(net)

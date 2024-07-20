@@ -43,3 +43,9 @@ def test_tokenomics_info_v1(grpcclient: GRPCClient):
     assert ti.v1.next_payday_mint_rate.exponent == 12
     assert ti.v1.total_staked_capital == 8663567331383744
     assert ti.v1.protocol_version == 4
+
+
+def test_tokenomics_info_v1_last(grpcclient: GRPCClient):
+    block_hash = "last_final"
+    ti = grpcclient.get_tokenomics_info(block_hash)
+    print(ti)

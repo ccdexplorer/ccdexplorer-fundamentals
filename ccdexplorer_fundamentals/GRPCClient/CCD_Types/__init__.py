@@ -329,6 +329,10 @@ class CCD_PassiveDelegationInfo(BaseModel):
     current_payday_delegated_capital: microCCD
     commission_rates: CCD_CommissionRates
 
+class CCD_ArrivedBlockInfo(BaseModel):
+    hash: CCD_BlockHash
+    height: int
+
 
 class CCD_FinalizedBlockInfo(BaseModel):
     hash: CCD_BlockHash

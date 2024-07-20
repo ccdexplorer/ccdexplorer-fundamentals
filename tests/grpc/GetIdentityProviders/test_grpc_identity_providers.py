@@ -2,6 +2,7 @@ import pytest
 import datetime as dt
 import sys
 import os
+from ccdexplorer_fundamentals.enums import NET
 
 sys.path.append(os.path.dirname("ccdexplorer_fundamentals"))
 from ccdexplorer_fundamentals.GRPCClient import GRPCClient
@@ -24,3 +25,15 @@ def test_identity_providers(grpcclient: GRPCClient):
         == "e0f2040fc103db1fb5429780b1c9d654ac6818c1d8ba847106dcae53e749fd40"
     )
     assert ip[2].identity == 2
+
+
+def test_all_identity_providers(grpcclient: GRPCClient):
+    block_hash = "last_final"
+    ip = grpcclient.get_identity_providers(block_hash, net=NET.TESTNET)
+    print(ip)
+    # assert ip[0].description.name == "Identity Provider 0"
+    # assert (
+    #     ip[1].cdi_verify_key
+    #     == "e0f2040fc103db1fb5429780b1c9d654ac6818c1d8ba847106dcae53e749fd40"
+    # )
+    # assert ip[2].identity == 2
