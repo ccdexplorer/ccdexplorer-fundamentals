@@ -466,6 +466,10 @@ class MongoMotor(
             for collection in Collections:
                 self.testnet[collection] = self.testnet_db[collection.value]
 
+            self.utilities_db = con["concordium_utilities"]
+            self.utilities: Dict[CollectionsUtilities, AsyncIOMotorCollection] = {}  # type: ignore
+            for collection in CollectionsUtilities:
+                self.utilities[collection] = self.utilities_db[collection.value]
             # console.log(f'Motor: {con.server_info()["version"]}')
         except Exception as e:
             print(e)
