@@ -330,6 +330,7 @@ class MongoTypePaydaysPerformance(BaseModel):
 
 
 class Collections(Enum):
+    all_account_addresses = "all_account_addresses"
     blocks = "blocks"
     transactions = "transactions"
     special_events = "special_events"
