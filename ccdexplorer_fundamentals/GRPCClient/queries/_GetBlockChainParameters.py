@@ -5,7 +5,7 @@ from ccdexplorer_fundamentals.enums import NET
 from ccdexplorer_fundamentals.GRPCClient.queries._SharedConverters import (
     Mixin as _SharedConverters,
 )
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from ccdexplorer_fundamentals.GRPCClient import GRPCClient
@@ -58,7 +58,7 @@ class Mixin(_SharedConverters):
         for descriptor in message.DESCRIPTOR.fields:
             key, value = self.get_key_value_from_descriptor(descriptor, message)
 
-            if type(value) == BlockSpecialEvent.AccountAmounts:
+            if type(value) is BlockSpecialEvent.AccountAmounts:
                 result[key] = self.convertAccountAmountsBakingRewards(value)
 
             elif type(value) in self.simple_types:
@@ -73,7 +73,7 @@ class Mixin(_SharedConverters):
         for descriptor in message.DESCRIPTOR.fields:
             key, value = self.get_key_value_from_descriptor(descriptor, message)
 
-            if type(value) == BlockSpecialEvent.AccountAmounts:
+            if type(value) is BlockSpecialEvent.AccountAmounts:
                 result[key] = self.convertAccountAmountsFinalizationRewards(value)
 
             elif type(value) in self.simple_types:
@@ -89,7 +89,7 @@ class Mixin(_SharedConverters):
             if type(value) in self.simple_types:
                 result[key] = self.convertType(value)
 
-            elif type(value) == ExchangeRate:
+            elif type(value) is ExchangeRate:
                 value_as_dict = MessageToDict(value)
                 result[key] = CCD_ExchangeRate(
                     **{
@@ -98,19 +98,19 @@ class Mixin(_SharedConverters):
                     }
                 )
 
-            elif type(value) == MintDistributionCpv0:
+            elif type(value) is MintDistributionCpv0:
                 result[key] = self.convertMintDistributionCpv0(value)
 
-            elif type(value) == TransactionFeeDistribution:
+            elif type(value) is TransactionFeeDistribution:
                 result[key] = self.convertTransactionFeeDistribution(value)
 
-            elif type(value) == GasRewards:
+            elif type(value) is GasRewards:
                 result[key] = self.convertGasRewards(value)
 
-            elif type(value) == HigherLevelKeys:
+            elif type(value) is HigherLevelKeys:
                 result[key] = self.convertHigherLevelKeys(value)
 
-            elif type(value) == AuthorizationsV0:
+            elif type(value) is AuthorizationsV0:
                 result[key] = self.convertAuthorizationsV0(value)
 
         return CCD_ChainParametersV0(**result)
@@ -123,13 +123,13 @@ class Mixin(_SharedConverters):
             if type(value) in self.simple_types:
                 result[key] = self.convertType(value)
 
-            elif type(value) == CooldownParametersCpv1:
+            elif type(value) is CooldownParametersCpv1:
                 result[key] = self.convertCooldownParametersCpv1(value)
 
-            elif type(value) == TimeParametersCpv1:
+            elif type(value) is TimeParametersCpv1:
                 result[key] = self.convertTimeParametersCpv1(value)
 
-            elif type(value) == ExchangeRate:
+            elif type(value) is ExchangeRate:
                 value_as_dict = MessageToDict(value)
                 result[key] = CCD_ExchangeRate(
                     **{
@@ -138,22 +138,22 @@ class Mixin(_SharedConverters):
                     }
                 )
 
-            elif type(value) == MintDistributionCpv1:
+            elif type(value) is MintDistributionCpv1:
                 result[key] = self.convertMintDistributionCpv1(value)
 
-            elif type(value) == TransactionFeeDistribution:
+            elif type(value) is TransactionFeeDistribution:
                 result[key] = self.convertTransactionFeeDistribution(value)
 
-            elif type(value) == GasRewards:
+            elif type(value) is GasRewards:
                 result[key] = self.convertGasRewards(value)
 
-            elif type(value) == PoolParametersCpv1:
+            elif type(value) is PoolParametersCpv1:
                 result[key] = self.convertPoolParametersCpv1(value)
 
-            elif type(value) == HigherLevelKeys:
+            elif type(value) is HigherLevelKeys:
                 result[key] = self.convertHigherLevelKeys(value)
 
-            elif type(value) == AuthorizationsV1:
+            elif type(value) is AuthorizationsV1:
                 result[key] = self.convertAuthorizationsV1(value)
 
         return CCD_ChainParametersV1(**result)
@@ -166,16 +166,16 @@ class Mixin(_SharedConverters):
             if type(value) in self.simple_types:
                 result[key] = self.convertType(value)
 
-            elif type(value) == ConsensusParametersV1:
+            elif type(value) is ConsensusParametersV1:
                 result[key] = self.convertConsensusParametersV1(value)
 
-            elif type(value) == CooldownParametersCpv1:
+            elif type(value) is CooldownParametersCpv1:
                 result[key] = self.convertCooldownParametersCpv1(value)
 
-            elif type(value) == TimeParametersCpv1:
+            elif type(value) is TimeParametersCpv1:
                 result[key] = self.convertTimeParametersCpv1(value)
 
-            elif type(value) == ExchangeRate:
+            elif type(value) is ExchangeRate:
                 value_as_dict = MessageToDict(value)
                 result[key] = CCD_ExchangeRate(
                     **{
@@ -184,37 +184,37 @@ class Mixin(_SharedConverters):
                     }
                 )
 
-            elif type(value) == MintDistributionCpv1:
+            elif type(value) is MintDistributionCpv1:
                 result[key] = self.convertMintDistributionCpv1(value)
 
-            elif type(value) == TransactionFeeDistribution:
+            elif type(value) is TransactionFeeDistribution:
                 result[key] = self.convertTransactionFeeDistribution(value)
 
-            elif type(value) == GasRewardsCpv2:
+            elif type(value) is GasRewardsCpv2:
                 result[key] = self.convertGasRewardsV2(value)
 
-            elif type(value) == PoolParametersCpv1:
+            elif type(value) is PoolParametersCpv1:
                 result[key] = self.convertPoolParametersCpv1(value)
 
-            elif type(value) == HigherLevelKeys:
+            elif type(value) is HigherLevelKeys:
                 result[key] = self.convertHigherLevelKeys(value)
 
-            elif type(value) == AuthorizationsV1:
+            elif type(value) is AuthorizationsV1:
                 result[key] = self.convertAuthorizationsV1(value)
 
-            elif type(value) == FinalizationCommitteeParameters:
+            elif type(value) is FinalizationCommitteeParameters:
                 result[key] = self.convertFinalizationCommitteeParameters(value)
 
         return CCD_ChainParametersV2(**result)
 
     def get_block_chain_parameters(
         self: GRPCClient,
-        block_hash: str,
+        block_input: Union[str, int],
         net: Enum = NET.MAINNET,
     ) -> CCD_ChainParameters:
         result = {}
 
-        blockHashInput = self.generate_block_hash_input_from(block_hash)
+        blockHashInput = self.generate_block_hash_input_from(block_input)
 
         grpc_return_value: ChainParameters = self.stub_on_net(
             net, "GetBlockChainParameters", blockHashInput

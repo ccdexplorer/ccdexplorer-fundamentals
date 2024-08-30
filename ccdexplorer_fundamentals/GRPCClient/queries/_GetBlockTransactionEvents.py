@@ -6,7 +6,7 @@ from enum import Enum
 from ccdexplorer_fundamentals.GRPCClient.queries._SharedConverters import (
     Mixin as _SharedConverters,
 )
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from ccdexplorer_fundamentals.GRPCClient import GRPCClient
@@ -49,7 +49,7 @@ class Mixin(_SharedConverters):
             if type(value) in self.simple_types:
                 result[key] = self.convertType(value)
 
-            if type(value) == BakerKeysEvent:
+            if type(value) is BakerKeysEvent:
                 result[key] = self.convertBakerKeysEvent(value)
 
         return CCD_BakerAdded(**result)
@@ -70,7 +70,7 @@ class Mixin(_SharedConverters):
             if type(value) in self.simple_types:
                 result[key] = self.convertType(value)
 
-            if type(value) == BakerStakeUpdatedData:
+            if type(value) is BakerStakeUpdatedData:
                 result[key] = self.convertBakerStakeUpdatedData(value)
 
         return CCD_BakerStakeUpdated(**result)
@@ -192,7 +192,7 @@ class Mixin(_SharedConverters):
         for descriptor in message.DESCRIPTOR.fields:
             key, value = self.get_key_value_from_descriptor(descriptor, message)
 
-            if type(value) == BakerKeysEvent:
+            if type(value) is BakerKeysEvent:
                 result[key] = self.convertBakerKeysEvent(value)
 
             elif type(value) in self.simple_types:
@@ -209,7 +209,7 @@ class Mixin(_SharedConverters):
             if type(value) in self.simple_types:
                 result[key] = self.convertType(value)
 
-            elif type(value) == DelegationTarget:
+            elif type(value) is DelegationTarget:
                 result[key] = self.convertDelegationTarget(value)
 
         return CCD_DelegationSetDelegationTarget(**result)
@@ -225,43 +225,43 @@ class Mixin(_SharedConverters):
                     pass
 
                 else:
-                    if type(value) == BakerEvent.BakerStakeIncreased:
+                    if type(value) is BakerEvent.BakerStakeIncreased:
                         result[key] = self.convertBakerStakeIncreased(value)
                         events.append(result)
 
-                    elif type(value) == BakerEvent.BakerStakeDecreased:
+                    elif type(value) is BakerEvent.BakerStakeDecreased:
                         result[key] = self.convertBakerStakeDecreased(value)
                         events.append(result)
 
-                    elif type(value) == BakerEvent.BakerSetMetadataUrl:
+                    elif type(value) is BakerEvent.BakerSetMetadataUrl:
                         result[key] = self.convertBakerSetMetadataUrl(value)
                         events.append(result)
 
-                    elif type(value) == BakerEvent.BakerSetOpenStatus:
+                    elif type(value) is BakerEvent.BakerSetOpenStatus:
                         result[key] = self.convertBakerSetOpenStatus(value)
                         events.append(result)
 
-                    elif type(value) == BakerEvent.BakerRestakeEarningsUpdated:
+                    elif type(value) is BakerEvent.BakerRestakeEarningsUpdated:
                         result[key] = self.convertBakerRestakeEarningsUpdated(value)
                         events.append(result)
 
-                    elif type(value) == BakerEvent.BakerSetBakingRewardCommission:
+                    elif type(value) is BakerEvent.BakerSetBakingRewardCommission:
                         result[key] = self.convertBakerSetBakingRewardCommission(value)
                         events.append(result)
 
-                    elif type(value) == BakerEvent.BakerSetTransactionFeeCommission:
+                    elif type(value) is BakerEvent.BakerSetTransactionFeeCommission:
                         result[key] = self.convertBakerSetTransactionFeeCommission(
                             value
                         )
                         events.append(result)
 
-                    elif type(value) == BakerEvent.BakerSetFinalizationRewardCommission:
+                    elif type(value) is BakerEvent.BakerSetFinalizationRewardCommission:
                         result[key] = self.convertBakerSetFinalizationRewardCommission(
                             value
                         )
                         events.append(result)
 
-                    elif type(value) == BakerKeysEvent:
+                    elif type(value) is BakerKeysEvent:
                         result[key] = self.convertBakerKeysEvent(value)
                         events.append(result)
 
@@ -281,22 +281,22 @@ class Mixin(_SharedConverters):
             for descriptor in entry.DESCRIPTOR.fields:
                 result = {}
                 key, value = self.get_key_value_from_descriptor(descriptor, entry)
-                if MessageToDict(value) == {}:
+                if MessageToDict(value) is {}:
                     pass
                 else:
-                    if type(value) == DelegationEvent.DelegationStakeIncreased:
+                    if type(value) is DelegationEvent.DelegationStakeIncreased:
                         result[key] = self.convertDelegationStakeIncreased(value)
                         events.append(result)
 
-                    elif type(value) == DelegationEvent.DelegationStakeDecreased:
+                    elif type(value) is DelegationEvent.DelegationStakeDecreased:
                         result[key] = self.convertDelegationStakeDecreased(value)
                         events.append(result)
 
-                    elif type(value) == DelegationEvent.DelegationSetDelegationTarget:
+                    elif type(value) is DelegationEvent.DelegationSetDelegationTarget:
                         result[key] = self.convertDelegationSetDelegationTarget(value)
                         events.append(result)
 
-                    elif type(value) == DelegationEvent.DelegationSetRestakeEarnings:
+                    elif type(value) is DelegationEvent.DelegationSetRestakeEarnings:
                         result[key] = self.convertDelegationSetSetRestakeEarnings(value)
                         events.append(result)
 
@@ -332,7 +332,7 @@ class Mixin(_SharedConverters):
         result = {}
         for descriptor in message.DESCRIPTOR.fields:
             key, value = self.get_key_value_from_descriptor(descriptor, message)
-            if MessageToDict(value) == {}:
+            if MessageToDict(value) is {}:
                 pass
             else:
                 if type(value) in self.simple_types:
@@ -444,80 +444,80 @@ class Mixin(_SharedConverters):
                     _type.update({"contents": type_contents})
             except:  # noqa F403
                 if _outcome == "success":
-                    if type(value) == ContractInitializedEvent:
+                    if type(value) is ContractInitializedEvent:
                         _type.update({"contents": key})
                         result[key] = self.convertEffectContractInitializedEvent(value)
 
-                    elif type(value) == AccountTransactionEffects.ContractUpdateIssued:
+                    elif type(value) is AccountTransactionEffects.ContractUpdateIssued:
                         _type.update({"contents": key})
                         result[key] = self.convertEffectContractUpdateIssued(value)
 
-                    elif type(value) == AccountTransactionEffects.AccountTransfer:
+                    elif type(value) is AccountTransactionEffects.AccountTransfer:
                         _type.update({"contents": key})
                         result[key] = self.convertEffectAccountTransfer(value)
 
-                    elif type(value) == BakerEvent.BakerAdded:
+                    elif type(value) is BakerEvent.BakerAdded:
                         _type.update({"contents": key})
                         result[key] = self.convertEffectBakerAdded(value)
 
-                    elif type(value) == BakerId:
+                    elif type(value) is BakerId:
                         _type.update({"contents": key})
                         result[key] = self.convertType(value)
 
-                    elif type(value) == AccountTransactionEffects.BakerStakeUpdated:
+                    elif type(value) is AccountTransactionEffects.BakerStakeUpdated:
                         _type.update({"contents": key})
                         result[key] = self.convertEffectBakerStakeUpdated(value)
 
-                    elif type(value) == BakerEvent.BakerRestakeEarningsUpdated:
+                    elif type(value) is BakerEvent.BakerRestakeEarningsUpdated:
                         _type.update({"contents": key})
                         result[key] = self.convertTypeWithSingleValues(value)
 
-                    elif type(value) == BakerKeysEvent:
+                    elif type(value) is BakerKeysEvent:
                         _type.update({"contents": key})
                         result[key] = self.convertBakerKeysEvent(value)
 
                     elif (
                         type(value)
-                        == AccountTransactionEffects.EncryptedAmountTransferred
+                        is AccountTransactionEffects.EncryptedAmountTransferred
                     ):
                         _type.update({"contents": key})
                         result[key] = (
                             self.convertEffectAccountEncryptedAmountTransferred(value)
                         )
 
-                    elif type(value) == EncryptedSelfAmountAddedEvent:
+                    elif type(value) is EncryptedSelfAmountAddedEvent:
                         _type.update({"contents": key})
                         result[key] = CCD_EncryptedSelfAmountAddedEvent(
                             **self.convertTypeWithSingleValues(value)
                         )
 
-                    elif type(value) == AccountTransactionEffects.TransferredToPublic:
+                    elif type(value) is AccountTransactionEffects.TransferredToPublic:
                         _type.update({"contents": key})
                         result[key] = self.convertEffectAccountTransferredToPublic(
                             value
                         )
 
                     elif (
-                        type(value) == AccountTransactionEffects.TransferredWithSchedule
+                        type(value) is AccountTransactionEffects.TransferredWithSchedule
                     ):
                         _type.update({"contents": key})
                         result[key] = self.convertEffectAccountTransferWithSchedule(
                             value
                         )
 
-                    elif type(value) == AccountTransactionEffects.CredentialsUpdated:
+                    elif type(value) is AccountTransactionEffects.CredentialsUpdated:
                         _type.update({"contents": key})
                         result[key] = self.convertCredentialsUpdated(value)
 
-                    elif type(value) == RegisteredData:
+                    elif type(value) is RegisteredData:
                         _type.update({"contents": key})
                         result[key] = self.convertType(value)
 
-                    elif type(value) == AccountTransactionEffects.BakerConfigured:
+                    elif type(value) is AccountTransactionEffects.BakerConfigured:
                         _type.update({"contents": key})
                         result[key] = self.convertEffectBakerConfigured(value)
 
-                    elif type(value) == AccountTransactionEffects.DelegationConfigured:
+                    elif type(value) is AccountTransactionEffects.DelegationConfigured:
                         _type.update({"contents": key})
                         result[key] = self.convertEffectDelegationConfigured(value)
 
@@ -536,7 +536,7 @@ class Mixin(_SharedConverters):
             if type(value) in self.simple_types:
                 result[key] = self.convertType(value)
 
-            if type(value) == AccountTransactionEffects:
+            if type(value) is AccountTransactionEffects:
                 (
                     result[key],
                     _type,
@@ -571,7 +571,7 @@ class Mixin(_SharedConverters):
             else:
                 _type.update({"contents": key})
 
-                if type(value) == ExchangeRate:
+                if type(value) is ExchangeRate:
                     value_as_dict = MessageToDict(value)
                     result[key] = CCD_ExchangeRate(
                         **{
@@ -583,53 +583,53 @@ class Mixin(_SharedConverters):
                 elif type(value) in [BakerStakeThreshold, ProtocolUpdate]:
                     result[key] = self.convertTypeWithSingleValues(value)
 
-                elif type(value) == Level1Update:
+                elif type(value) is Level1Update:
                     result[key] = self.convertLevel1Update(value)
 
-                elif type(value) == IpInfo:
+                elif type(value) is IpInfo:
                     result[key] = self.convertIpInfo(value)
 
                 # TODO: no test available
-                elif type(value) == ElectionDifficulty:
+                elif type(value) is ElectionDifficulty:
                     result[key] = self.convertElectionDifficulty(value)
 
                 # TODO: no test available
-                elif type(value) == MintDistributionCpv0:
+                elif type(value) is MintDistributionCpv0:
                     result[key] = self.convertMintDistributionCpv0(value)
 
                 # TODO: no test available
-                elif type(value) == TransactionFeeDistribution:
+                elif type(value) is TransactionFeeDistribution:
                     result[key] = self.convertTransactionFeeDistribution(value)
 
                 # TODO: no test available
-                elif type(value) == GasRewards:
+                elif type(value) is GasRewards:
                     result[key] = self.convertGasRewards(value)
 
                 # TODO: no test available
-                elif type(value) == RootUpdate:
+                elif type(value) is RootUpdate:
                     result[key] = self.convertRootUpdate(value)
 
                 # TODO: no test available
-                elif type(value) == ArInfo:
+                elif type(value) is ArInfo:
                     result[key] = self.convertArInfo(value)
 
                 # TODO: no test available
-                elif type(value) == CooldownParametersCpv1:
+                elif type(value) is CooldownParametersCpv1:
                     result[key] = self.convertCooldownParametersCpv1(value)
 
                 # TODO: no test available
-                elif type(value) == PoolParametersCpv1:
+                elif type(value) is PoolParametersCpv1:
                     result[key] = self.convertPoolParametersCpv1(value)
 
                 # TODO: no test available
-                elif type(value) == TimeParametersCpv1:
+                elif type(value) is TimeParametersCpv1:
                     result[key] = self.convertTimeParametersCpv1(value)
 
                 # TODO: no test available
-                elif type(value) == MintDistributionCpv1:
+                elif type(value) is MintDistributionCpv1:
                     result[key] = self.convertMintDistributionCpv1(value)
 
-                elif type(value) == FinalizationCommitteeParameters:
+                elif type(value) is FinalizationCommitteeParameters:
                     result[key] = self.convertFinalizationCommitteeParameters(value)
 
                 elif type(value) in self.simple_types:
@@ -646,7 +646,7 @@ class Mixin(_SharedConverters):
             if self.valueIsEmpty(value):
                 pass
             else:
-                if type(value) == UpdatePayload:
+                if type(value) is UpdatePayload:
                     result[key], _type = self.convertUpdatePayload(value)
 
                 elif type(value) in self.simple_types:
@@ -656,10 +656,10 @@ class Mixin(_SharedConverters):
 
     def get_block_transaction_events(
         self: GRPCClient,
-        block_hash: str,
+        block_input: Union[str, int],
         net: Enum = NET.MAINNET,
     ) -> CCD_Block:
-        blockHashInput = self.generate_block_hash_input_from(block_hash)
+        blockHashInput = self.generate_block_hash_input_from(block_input)
 
         grpc_return_value = self.stub_on_net(
             net, "GetBlockTransactionEvents", blockHashInput
@@ -673,15 +673,15 @@ class Mixin(_SharedConverters):
                 if type(value) in self.simple_types:
                     result[key] = self.convertType(value)
 
-                if type(value) == UpdateDetails:
+                if type(value) is UpdateDetails:
                     result[key], result["type"] = self.convertUpdateDetails(value)
 
-                if type(value) == AccountCreationDetails:
+                if type(value) is AccountCreationDetails:
                     result[key], result["type"] = self.convertAccountCreationDetails(
                         value
                     )
 
-                if type(value) == AccountTransactionDetails:
+                if type(value) is AccountTransactionDetails:
                     result[key], result["type"] = self.convertAccountTransactionDetails(
                         value
                     )
