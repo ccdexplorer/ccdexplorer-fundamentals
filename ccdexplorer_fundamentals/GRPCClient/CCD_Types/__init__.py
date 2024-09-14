@@ -329,6 +329,7 @@ class CCD_PassiveDelegationInfo(BaseModel):
     current_payday_delegated_capital: microCCD
     commission_rates: CCD_CommissionRates
 
+
 class CCD_ArrivedBlockInfo(BaseModel):
     hash: CCD_BlockHash
     height: int
@@ -863,6 +864,7 @@ class CCD_BlockItemSummary(BaseModel):
     account_creation: Optional[CCD_AccountCreationDetails] = None
     update: Optional[CCD_UpdateDetails] = None
     block_info: Optional[CCD_ShortBlockInfo] = None
+    recognized_sender_id: Optional[str] = None
 
 
 class CCD_Block(BaseModel):
