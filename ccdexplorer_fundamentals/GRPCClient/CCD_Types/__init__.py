@@ -53,12 +53,18 @@ class ProtocolVersions(Enum):
     PROTOCOL_VERSION_4 = 3
     PROTOCOL_VERSION_5 = 4
     PROTOCOL_VERSION_6 = 5
+    PROTOCOL_VERSION_7 = 6
 
 
 class OpenStatus(Enum):
     open_for_all = 0
     closed_for_new = 1
     closed_for_all = 2
+
+class CoolDownStatus(Enum):
+    COOLDOWN = 0
+    PRE_COOLDOWN = 1
+    PRE_PRE_COOLDOWN = 2
 
 
 CCD_ArIdentity = int
@@ -312,13 +318,13 @@ class CCD_BakerPoolInfo(BaseModel):
 class CCD_PoolInfo(BaseModel):
     all_pool_total_capital: microCCD
     address: CCD_AccountAddress
-    equity_capital: microCCD
+    equity_capital: Optional[microCCD] = None
     baker: int
     equity_pending_change: Optional[CCD_BakerStakePendingChange] = None
     current_payday_info: Optional[CCD_CurrentPaydayStatus] = None
-    delegated_capital: microCCD
-    delegated_capital_cap: microCCD
-    pool_info: CCD_BakerPoolInfo
+    delegated_capital: Optional[microCCD] = None
+    delegated_capital_cap: Optional[microCCD] = None
+    pool_info: Optional[CCD_BakerPoolInfo] = None
     # poolType: str = None
 
 
@@ -546,6 +552,7 @@ class CCD_BakerSetFinalizationRewardCommission(BaseModel):
 class CCD_BakerEvent(BaseModel):
     baker_added: Optional[CCD_BakerAdded] = None
     baker_removed: Optional[CCD_BakerId] = None
+    delegation_removed: Optional[CCD_DelegatorId] = None
     baker_stake_increased: Optional[CCD_BakerStakeIncreased] = None
     baker_stake_decreased: Optional[CCD_BakerStakeDecreased] = None
     baker_restake_earnings_updated: Optional[CCD_BakerRestakeEarningsUpdated] = None
@@ -595,6 +602,7 @@ class CCD_DelegationSetDelegationTarget(BaseModel):
 class CCD_DelegationEvent(BaseModel):
     delegation_added: Optional[CCD_DelegatorId] = None
     delegation_removed: Optional[CCD_DelegatorId] = None
+    baker_removed: Optional[CCD_BakerId] = None
     delegation_stake_increased: Optional[CCD_DelegationStakeIncreased] = None
     delegation_stake_decreased: Optional[CCD_DelegationStakeDecreased] = None
     delegation_set_restake_earnings: Optional[CCD_DelegationSetRestakeEarnings] = None
@@ -990,6 +998,10 @@ class CCD_EncryptedBalance(BaseModel):
     num_aggregated: Optional[int] = None
     incoming_amounts: list[CCD_EncryptedAmount]
 
+class CCD_Cooldown(BaseModel):
+    end_time: CCD_TimeStamp
+    amount: microCCD
+    status: CoolDownStatus
 
 class CCD_AccountInfo(BaseModel):
     address: str
@@ -1002,6 +1014,8 @@ class CCD_AccountInfo(BaseModel):
     schedule: Optional[CCD_ReleaseSchedule] = None
     threshold: int
     sequence_number: CCD_SequenceNumber
+    available_balance: Optional[microCCD] = None
+    cooldowns: list[CCD_Cooldown]
 
 
 class CCD_TokenomicsInfo_V0(BaseModel):

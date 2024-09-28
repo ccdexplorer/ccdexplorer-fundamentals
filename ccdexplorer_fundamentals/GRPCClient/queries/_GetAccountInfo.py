@@ -282,10 +282,10 @@ class Mixin(_SharedConverters):
             if type(value) in self.simple_types:
                 result[key] = self.convertType(value)
 
-            elif type(value) == ReleaseSchedule:
+            elif type(value) is ReleaseSchedule:
                 result[key] = self.convertRelease(value)
 
-            elif type(value) == EncryptedBalance:
+            elif type(value) is EncryptedBalance:
                 result[key] = self.convertEncryptedBalance(value)
 
             # TODO
@@ -295,7 +295,11 @@ class Mixin(_SharedConverters):
             elif key == "creds":
                 result["credentials"] = self.convertCredentials(value)
 
-            elif type(value) == AccountStakingInfo:
+            elif type(value) is AccountStakingInfo:
                 result[key] = self.convertAccountStakingInfo(value)
+
+            elif key == "cooldowns":
+                # result[key] = self.convertCoolDowns(value)
+                pass
 
         return CCD_AccountInfo(**result)

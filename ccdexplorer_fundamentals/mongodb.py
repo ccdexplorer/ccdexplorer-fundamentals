@@ -332,6 +332,7 @@ class MongoTypePaydaysPerformance(BaseModel):
 class Collections(Enum):
     all_account_addresses = "all_account_addresses"
     blocks = "blocks"
+    blocks_log = "blocks_log"
     transactions = "transactions"
     special_events = "special_events"
     instances = "instances"
@@ -391,6 +392,10 @@ class CollectionsUtilities(Enum):
     projects = "projects"
     usecases = "usecases"
     helpers = "helpers"
+    # api
+    api_api_keys = "api_api_keys"
+    # api
+    api_users = "api_users"
 
 
 class MongoDB(

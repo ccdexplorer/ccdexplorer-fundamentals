@@ -356,6 +356,38 @@ class Mixin(Protocol):
                 resulting_dict[key] = self.convertType(value)
 
         return CCD_ReleaseSchedule(**resulting_dict)
+    
+    def convertCoolDowns(self, message) -> [CCD_Cooldown]:
+        resulting_dict = {}
+
+        for descriptor in message.DESCRIPTOR.fields:
+            key, value = self.get_key_value_from_descriptor(descriptor, message)
+
+            # if key == "schedules":
+            #     schedule = []
+            #     for entry in value:
+            #         entry_dict = {}
+            #         for descriptor in entry.DESCRIPTOR.fields:
+            #             key, value = self.get_key_value_from_descriptor(
+            #                 descriptor, entry
+            #             )
+
+            #             if key == "transactions":
+            #                 entry_dict[key] = self.convertList(value)
+
+            #             elif type(value) == Timestamp:
+            #                 entry_dict[key] = self.convertType(value)
+
+            #             elif type(value) == Amount:
+            #                 entry_dict[key] = self.convertType(value)
+
+            #         schedule.append(entry_dict)
+            #     resulting_dict["schedules"] = schedule
+
+            # elif type(value) == Amount:
+            #     resulting_dict[key] = self.convertType(value)
+
+        return CCD_Cooldown(**resulting_dict)
 
     def convertArInfo(self, message) -> CCD_ArInfo:
         result = {}
