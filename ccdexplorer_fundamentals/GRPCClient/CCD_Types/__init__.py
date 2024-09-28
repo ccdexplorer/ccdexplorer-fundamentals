@@ -1015,7 +1015,7 @@ class CCD_AccountInfo(BaseModel):
     threshold: int
     sequence_number: CCD_SequenceNumber
     available_balance: Optional[microCCD] = None
-    cooldowns: list[CCD_Cooldown]
+    cooldowns: Optional[list[CCD_Cooldown]] = None
 
 
 class CCD_TokenomicsInfo_V0(BaseModel):
