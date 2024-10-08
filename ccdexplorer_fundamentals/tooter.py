@@ -40,6 +40,7 @@ class Tooter:
         self.plain_url = "https://tooter.ccdexplorer.io"
         self.email_part_1 = MAILTO_LINK
         self.email_part_2 = f"""&user={MAILTO_USER}&pass={FASTMAIL_TOKEN}&from=CCDExplorer Bot<bot@ccdexplorer.io>"""
+        self.email_part_2_api = f"""&user={MAILTO_USER}&pass={FASTMAIL_TOKEN}&from=CCDExplorer API Bot<bot@ccdexplorer.io>"""
 
     def email(self, title: str, body: str, email_address: str, value=None, error=None):
         body_signature = """
@@ -48,6 +49,19 @@ Please visit your <a href='https://ccdexplorer.io/settings/user/overview'>accoun
         """
         payload = {
             "urls": f"{self.email_part_1}{email_address}{self.email_part_2 }",
+            "title": title,
+            "body": body + body_signature,
+            "format": "html",
+        }
+        _ = requests.post(self.url, json=payload)
+
+    def email_api(
+        self, title: str, body: str, email_address: str, value=None, error=None
+    ):
+        body_signature = """
+        """
+        payload = {
+            "urls": f"{self.email_part_1}{email_address}{self.email_part_2_api }",
             "title": title,
             "body": body + body_signature,
             "format": "html",
