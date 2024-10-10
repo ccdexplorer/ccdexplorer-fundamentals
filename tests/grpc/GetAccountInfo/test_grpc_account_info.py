@@ -5,6 +5,7 @@ import os
 
 sys.path.append(os.path.dirname("ccdexplorer_fundamentals"))
 from ccdexplorer_fundamentals.GRPCClient import GRPCClient
+from ccdexplorer_fundamentals.GRPCClient.CCD_Types import CoolDownStatus
 from rich import print
 from ccdexplorer_fundamentals.enums import NET
 
@@ -142,4 +143,14 @@ def test_tx_account_info_corporate_account(grpcclient: GRPCClient):
     block_hash = "last_final"
     ai = grpcclient.get_account_info(block_hash, hex_address=account, net=NET.TESTNET)
     print(ai)
+    # assert ai.address == "38BkoGvD3EPiChHjWJ55Do6zSn8QugJFhGyhdB9ybowSqPi8Ta"
+
+
+def test_tx_account_info_cooldown_P7(grpcclient: GRPCClient):
+    account = "4Z2sLB2cfHV1H2VGVEMJ7t6ZLKqiXVE1CF8fua1f89fi3bc1nx"
+    block_hash = "32f62592688b9c9b56de591d721f656e86450371453036d8b22cc1085ca85ccd"
+    ai = grpcclient.get_account_info(block_hash, hex_address=account, net=NET.TESTNET)
+    print(ai)
+    assert ai.cooldowns[0].status == CoolDownStatus.PRE_PRE_COOLDOWN
+    assert ai.cooldowns[0].amount == 12500000000
     # assert ai.address == "38BkoGvD3EPiChHjWJ55Do6zSn8QugJFhGyhdB9ybowSqPi8Ta"

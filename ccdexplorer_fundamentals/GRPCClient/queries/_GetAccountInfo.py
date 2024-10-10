@@ -163,13 +163,27 @@ class Mixin(_SharedConverters):
             if self.valueIsEmpty(value):
                 pass
             else:
-                if type(value) == InitialCredentialValues:
+                if type(value) is InitialCredentialValues:
                     result[key] = self.convertInitialCredentialValues(value)
 
-                elif type(value) == NormalCredentialValues:
+                elif type(value) is NormalCredentialValues:
                     result[key] = self.convertNormalCredentialValues(value)
 
         return CCD_AccountCredential(**result)
+
+    def convertCooldown(self, message) -> CCD_Cooldown:
+        result = {}
+        for descriptor in message.DESCRIPTOR.fields:
+            key, value = self.get_key_value_from_descriptor(descriptor, message)
+            if self.valueIsEmpty(value):
+                pass
+            else:
+                if type(value) in self.simple_types:
+                    result[key] = self.convertType(value)
+                if key == "status":
+                    result[key] = CoolDownStatus(value)
+
+        return CCD_Cooldown(**result)
 
     def convertCredentials(self, message) -> dict[str, CCD_AccountCredential]:
         cred_dict = {}
@@ -177,6 +191,21 @@ class Mixin(_SharedConverters):
             cred_dict[str(index)] = self.convertAccountCredential(credential)
 
         return cred_dict
+
+    def convertCooldowns(self, message) -> list[CCD_Cooldown]:
+        cooldowns = []
+
+        for entry in message:
+            result = {}
+            for descriptor in entry.DESCRIPTOR.fields:
+                key, value = self.get_key_value_from_descriptor(descriptor, entry)
+                if type(value) in self.simple_types:
+                    result[key] = self.convertType(value)
+                if key == "status":
+                    result[key] = CoolDownStatus(value)
+
+            cooldowns.append(CCD_Cooldown(**result))
+        return cooldowns
 
     def convertEncryptedBalance(self, message) -> CCD_EncryptedBalance:
         result = {}
@@ -299,7 +328,6 @@ class Mixin(_SharedConverters):
                 result[key] = self.convertAccountStakingInfo(value)
 
             elif key == "cooldowns":
-                # result[key] = self.convertCoolDowns(value)
-                pass
+                result[key] = self.convertCooldowns(value)
 
         return CCD_AccountInfo(**result)
