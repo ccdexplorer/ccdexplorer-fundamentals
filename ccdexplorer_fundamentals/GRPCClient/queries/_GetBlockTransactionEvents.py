@@ -281,7 +281,7 @@ class Mixin(_SharedConverters):
             for descriptor in entry.DESCRIPTOR.fields:
                 result = {}
                 key, value = self.get_key_value_from_descriptor(descriptor, entry)
-                if MessageToDict(value) is {}:
+                if MessageToDict(value) == {}:
                     pass
                 else:
                     if type(value) is DelegationEvent.DelegationStakeIncreased:
@@ -300,7 +300,7 @@ class Mixin(_SharedConverters):
                         result[key] = self.convertDelegationSetSetRestakeEarnings(value)
                         events.append(result)
 
-                    elif key == "delegation_removed":
+                    elif key == "delegation_added":
                         result[key] = self.convertType(value)
                         events.append(result)
 
