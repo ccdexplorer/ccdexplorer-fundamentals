@@ -74,10 +74,10 @@ class Mixin(_SharedConverters):
                 descriptor, grpc_return_value
             )
 
-            if type(value) == InstanceInfo.V0:
+            if type(value) is InstanceInfo.V0:
                 result[f"{key}"] = self.convertInstanceInfo_V0(value)
 
-            elif type(value) == InstanceInfo.V1:
+            elif type(value) is InstanceInfo.V1:
                 result[f"{key}"] = self.convertInstanceInfo_V1(value)
 
         return CCD_InstanceInfo(**result)

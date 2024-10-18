@@ -143,7 +143,7 @@ class Mixin(Protocol):
         if isinstance(value, int):
             return value is None
         else:
-            if type(value) == RepeatedCompositeContainer:
+            if type(value) is RepeatedCompositeContainer:
                 return False
             else:
                 if hasattr(value, "DESCRIPTOR"):
@@ -246,16 +246,16 @@ class Mixin(Protocol):
         elif type(value) in [int, bool, str, float]:
             return value
 
-        elif type(value) == ElectionDifficulty:
+        elif type(value) is ElectionDifficulty:
             return value.value.parts_per_hundred_thousand / 100_000
 
-        elif type(value) == AmountFraction:
+        elif type(value) is AmountFraction:
             return value.parts_per_hundred_thousand / 100_000
 
-        elif type(value) == Empty:
+        elif type(value) is Empty:
             return None  # pragma: no cover
 
-        elif type(value) == Address:
+        elif type(value) is Address:
             if MessageToDict(value.account) == {}:
                 return CCD_Address(
                     **{"contract": self.convertContractAddress(value.contract)}
@@ -265,24 +265,24 @@ class Mixin(Protocol):
                     **{"account": self.convertAccountAddress(value.account)}
                 )
 
-        elif type(value) == AccountAddress:
+        elif type(value) is AccountAddress:
             return self.convertAccountAddress(value)
 
-        elif type(value) == BakerId:
+        elif type(value) is BakerId:
             return value.value
             # else:
             #     return None
 
-        elif type(value) == ContractAddress:
+        elif type(value) is ContractAddress:
             return self.convertContractAddress(value)
 
-        elif type(value) == AccountVerifyKey:
+        elif type(value) is AccountVerifyKey:
             return value.ed25519_key.hex()
 
-        elif type(value) == ChainArData:
+        elif type(value) is ChainArData:
             return value.enc_id_cred_pub_share.hex()
 
-        elif type(value) == Timestamp:
+        elif type(value) is Timestamp:
             if MessageToDict(value) == {}:
                 pass
             else:
@@ -290,7 +290,7 @@ class Mixin(Protocol):
                     int(MessageToDict(value)["value"]) / 1_000, tz=timezone.utc
                 )
 
-        elif type(value) == DelegatorId:
+        elif type(value) is DelegatorId:
             return value.id.value
 
     def convertContractAddress(self, value: ContractAddress) -> CCD_ContractAddress:
@@ -307,9 +307,9 @@ class Mixin(Protocol):
         for descriptor in message.DESCRIPTOR.fields:
             key, value = self.get_key_value_from_descriptor(descriptor, message)
 
-            if type(value) == Empty:
+            if type(value) is Empty:
                 pass
-            if type(value) == BakerId:
+            if type(value) is BakerId:
                 if self.valueIsEmpty(value):
                     result["passive_delegation"] = True
                 else:
@@ -343,21 +343,21 @@ class Mixin(Protocol):
                         if key == "transactions":
                             entry_dict[key] = self.convertList(value)
 
-                        elif type(value) == Timestamp:
+                        elif type(value) is Timestamp:
                             entry_dict[key] = self.convertType(value)
 
-                        elif type(value) == Amount:
+                        elif type(value) is Amount:
                             entry_dict[key] = self.convertType(value)
 
                     schedule.append(entry_dict)
                 resulting_dict["schedules"] = schedule
 
-            elif type(value) == Amount:
+            elif type(value) is Amount:
                 resulting_dict[key] = self.convertType(value)
 
         return CCD_ReleaseSchedule(**resulting_dict)
-    
-    def convertCoolDowns(self, message) -> [CCD_Cooldown]:
+
+    def convertCoolDowns(self, message) -> list[CCD_Cooldown]:
         resulting_dict = {}
 
         for descriptor in message.DESCRIPTOR.fields:
@@ -375,16 +375,16 @@ class Mixin(Protocol):
             #             if key == "transactions":
             #                 entry_dict[key] = self.convertList(value)
 
-            #             elif type(value) == Timestamp:
+            #             elif type(value) is Timestamp:
             #                 entry_dict[key] = self.convertType(value)
 
-            #             elif type(value) == Amount:
+            #             elif type(value) is Amount:
             #                 entry_dict[key] = self.convertType(value)
 
             #         schedule.append(entry_dict)
             #     resulting_dict["schedules"] = schedule
 
-            # elif type(value) == Amount:
+            # elif type(value) is Amount:
             #     resulting_dict[key] = self.convertType(value)
 
         return CCD_Cooldown(**resulting_dict)
@@ -397,7 +397,7 @@ class Mixin(Protocol):
             if type(value) in [ArInfo.ArIdentity, ArInfo.ArPublicKey]:
                 result[key] = self.convertType(value)
 
-            elif type(value) == Description:
+            elif type(value) is Description:
                 result[key] = self.convertTypeWithSingleValues(value)
 
         return CCD_ArInfo(**result)
@@ -410,7 +410,7 @@ class Mixin(Protocol):
             if type(value) in [IpIdentity, IpInfo.IpVerifyKey, IpInfo.IpCdiVerifyKey]:
                 result[key] = self.convertType(value)
 
-            elif type(value) == Description:
+            elif type(value) is Description:
                 result[key] = self.convertTypeWithSingleValues(value)
 
         return CCD_IpInfo(**result)
@@ -427,7 +427,7 @@ class Mixin(Protocol):
             if key == "open_status":
                 result[key] = OpenStatus(value).name
 
-            elif type(value) == CommissionRates:
+            elif type(value) is CommissionRates:
                 result[key] = self.convertCommissionRates(value)
 
         return CCD_BakerPoolInfo(**result)
@@ -446,7 +446,7 @@ class Mixin(Protocol):
         for descriptor in message.DESCRIPTOR.fields:
             key, value = self.get_key_value_from_descriptor(descriptor, message)
 
-            if type(value) == AmountFraction:
+            if type(value) is AmountFraction:
                 result[key] = self.convertType(value)
 
         return CCD_InclusiveRangeAmountFraction(**result)
@@ -457,10 +457,10 @@ class Mixin(Protocol):
         for descriptor in message.DESCRIPTOR.fields:
             key, value = self.get_key_value_from_descriptor(descriptor, message)
 
-            if type(value) == InclusiveRangeAmountFraction:
+            if type(value) is InclusiveRangeAmountFraction:
                 result[key] = self.convertTypeWithSingleValues(value)
 
-            elif type(value) == Ratio:
+            elif type(value) is Ratio:
                 result[key] = CCD_Ratio(
                     **{
                         "numerator": str(value.numerator),
@@ -468,14 +468,14 @@ class Mixin(Protocol):
                     }
                 )
 
-            elif type(value) == RewardPeriodLength:
+            elif type(value) is RewardPeriodLength:
                 result[key] = self.convertType(value.value)
 
-            elif type(value) == MintRate:
+            elif type(value) is MintRate:
                 result[key] = CCD_MintRate(
                     **{"mantissa": value.mantissa, "exponent": value.exponent}
                 )
-            elif type(value) == BakerId:
+            elif type(value) is BakerId:
                 if descriptor.json_name in MessageToDict(message):
                     result[key] = self.convertType(value)
             else:
@@ -529,7 +529,7 @@ class Mixin(Protocol):
                 if MessageToDict(value) == {}:
                     pass
                 else:
-                    if type(value) == Ratio:
+                    if type(value) is Ratio:
                         result[key] = CCD_Ratio(
                             **{
                                 "numerator": value.numerator,
@@ -610,7 +610,7 @@ class Mixin(Protocol):
                     if key == "keys":
                         result[key] = self.convertUpdatePublicKeys(value)
 
-                    elif type(value) == AccessStructure:
+                    elif type(value) is AccessStructure:
                         result[key] = self.convertAccessStructure(value)
 
                     elif type(value) in self.simple_types:
@@ -628,10 +628,10 @@ class Mixin(Protocol):
                 if self.valueIsEmpty(value):
                     pass
                 else:
-                    if type(value) == AuthorizationsV0:
+                    if type(value) is AuthorizationsV0:
                         result[key] = self.convertAuthorizationsV0(value)
 
-                    elif type(value) == AccessStructure:
+                    elif type(value) is AccessStructure:
                         result[key] = self.convertAccessStructure(value)
 
                     elif type(value) in self.simple_types:
@@ -649,13 +649,13 @@ class Mixin(Protocol):
                 if MessageToDict(value) == {}:
                     pass
                 else:
-                    if type(value) == HigherLevelKeys:
+                    if type(value) is HigherLevelKeys:
                         result[key] = self.convertHigherLevelKeys(value)
 
-                    elif type(value) == AuthorizationsV0:
+                    elif type(value) is AuthorizationsV0:
                         result[key] = self.convertAuthorizationsV0(value)
 
-                    elif type(value) == AuthorizationsV1:
+                    elif type(value) is AuthorizationsV1:
                         result[key] = self.convertAuthorizationsV1(value)
 
         return CCD_Level1Update(**result)
@@ -670,13 +670,13 @@ class Mixin(Protocol):
                 if MessageToDict(value) == {}:
                     pass
                 else:
-                    if type(value) == HigherLevelKeys:
+                    if type(value) is HigherLevelKeys:
                         result[key] = self.convertHigherLevelKeys(value)
 
-                    elif type(value) == AuthorizationsV0:
+                    elif type(value) is AuthorizationsV0:
                         result[key] = self.convertAuthorizationsV0(value)
 
-                    elif type(value) == AuthorizationsV1:
+                    elif type(value) is AuthorizationsV1:
                         result[key] = self.convertAuthorizationsV1(value)
 
         return CCD_RootUpdate(**result)
@@ -697,7 +697,7 @@ class Mixin(Protocol):
                 if MessageToDict(value) == {}:
                     pass
                 else:
-                    if type(value) == CommissionRanges:
+                    if type(value) is CommissionRanges:
                         result[key] = self.converCommissionRanges(value)
 
                     # elif type(value) in [BakerStakeThreshold, ProtocolUpdate]:
@@ -709,7 +709,7 @@ class Mixin(Protocol):
                     elif type(value) in [CapitalBound, LeverageFactor]:
                         result[key] = self.convertTypeWithSingleValues(value)
 
-                    elif type(value) == AmountFraction:
+                    elif type(value) is AmountFraction:
                         result[key] = self.convertType(value)
 
         return CCD_PoolParametersCpv1(**result)
@@ -747,7 +747,7 @@ class Mixin(Protocol):
                 if self.valueIsEmpty(value):
                     pass
                 else:
-                    if type(value) == TimeoutParameters:
+                    if type(value) is TimeoutParameters:
                         result[key] = self.convertTypeWithSingleValues(value)
 
                     elif type(value) in self.simple_types:
@@ -801,10 +801,10 @@ class Mixin(Protocol):
                 if self.valueIsEmpty(value):
                     pass
                 else:
-                    if type(value) == MintRate:
+                    if type(value) is MintRate:
                         result[key] = self.convertMintRate(value)
 
-                    elif type(value) == AmountFraction:
+                    elif type(value) is AmountFraction:
                         result[key] = self.convertType(value)
 
         return CCD_MintDistributionCpv0(**result)
@@ -892,19 +892,19 @@ class Mixin(Protocol):
                 if MessageToDict(value) == {}:
                     pass
                 else:
-                    if type(value) == InstanceUpdatedEvent:
+                    if type(value) is InstanceUpdatedEvent:
                         entry_dict[key] = self.convertInstanceUpdatedEvent(value)
 
-                    if type(value) == ContractTraceElement.Interrupted:
+                    if type(value) is ContractTraceElement.Interrupted:
                         entry_dict[key] = self.convertInstanceInterruptedEvent(value)
 
-                    if type(value) == ContractTraceElement.Resumed:
+                    if type(value) is ContractTraceElement.Resumed:
                         entry_dict[key] = self.convertInstanceResumedEvent(value)
 
-                    if type(value) == ContractTraceElement.Transferred:
+                    if type(value) is ContractTraceElement.Transferred:
                         entry_dict[key] = self.convertInstanceTransferredEvent(value)
 
-                    if type(value) == ContractTraceElement.Upgraded:
+                    if type(value) is ContractTraceElement.Upgraded:
                         entry_dict[key] = self.convertInstanceUpgradedEvent(value)
                 if entry_dict == {}:
                     pass
@@ -1062,7 +1062,7 @@ class Mixin(Protocol):
             ]:
                 result[key] = self.convertTypeWithSingleValues(value)
 
-            elif type(value) == RejectReason.DuplicateCredIds:
+            elif type(value) is RejectReason.DuplicateCredIds:
                 result[key] = self.convertDuplicateCredIds(value)
         return result, _type
 
@@ -1075,7 +1075,7 @@ class Mixin(Protocol):
             if type(value) in self.simple_types:
                 result[key] = self.convertType(value)
 
-            elif type(value) == RejectReason:
+            elif type(value) is RejectReason:
                 result[key], _type = self.convertRejectReason(value)
 
         return CCD_AccountTransactionEffects_None(**result), _type

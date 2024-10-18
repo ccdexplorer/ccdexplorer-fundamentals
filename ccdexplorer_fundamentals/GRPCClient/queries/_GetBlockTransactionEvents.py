@@ -332,7 +332,7 @@ class Mixin(_SharedConverters):
         result = {}
         for descriptor in message.DESCRIPTOR.fields:
             key, value = self.get_key_value_from_descriptor(descriptor, message)
-            if MessageToDict(value) is {}:
+            if MessageToDict(value) == {}:
                 pass
             else:
                 if type(value) in self.simple_types:

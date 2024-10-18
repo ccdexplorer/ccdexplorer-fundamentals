@@ -43,16 +43,16 @@ class Mixin(_SharedConverters):
             if type(value) in self.simple_types:
                 result[key_to_store] = self.convertType(value)
 
-            elif type(value) == BakerPoolInfo:
+            elif type(value) is BakerPoolInfo:
                 result[key_to_store] = self.convertBakerPoolInfo(value)
 
-            elif type(value) == PoolCurrentPaydayInfo:
+            elif type(value) is PoolCurrentPaydayInfo:
                 if self.valueIsEmpty(value):
                     result[key_to_store] = None
                 else:
                     result[key_to_store] = self.convertPoolCurrentPaydayInfo(value)
 
-            elif type(value) == PoolPendingChange:
+            elif type(value) is PoolPendingChange:
                 result[key_to_store] = self.convertPoolPendingChange(value)
 
         return CCD_PoolInfo(**result)

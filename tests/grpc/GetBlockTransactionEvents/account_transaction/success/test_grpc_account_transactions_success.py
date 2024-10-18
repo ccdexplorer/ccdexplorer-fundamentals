@@ -703,3 +703,21 @@ def test_tx_instance_migration(grpcclient: GRPCClient):
         ].upgraded.to_module
         == "fc9e9fdb728c4657891390f58dcb91070f10b93d6b9928cae7cb18823466cd44"
     )
+
+
+def test_tx_testnet_delegation_configured_p7(grpcclient: GRPCClient):
+    block_hash = grpcclient.get_finalized_block_at_height(20325075, NET.TESTNET).hash
+    tx = tx_at_index_from(0, block_hash, grpcclient, NET.TESTNET)
+    print(tx)
+
+
+def test_tx_testnet_delegation_configured_p6(grpcclient: GRPCClient):
+    block_hash = grpcclient.get_finalized_block_at_height(17864381, NET.TESTNET).hash
+    tx = tx_at_index_from(0, block_hash, grpcclient, NET.TESTNET)
+    print(tx)
+
+
+def test_tx_mainnet_delegation_configured(grpcclient: GRPCClient):
+    block_hash = grpcclient.get_finalized_block_at_height(4736706, NET.MAINNET).hash
+    tx = tx_at_index_from(5, block_hash, grpcclient, NET.MAINNET)
+    print(tx)

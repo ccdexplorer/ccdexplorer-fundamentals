@@ -102,7 +102,18 @@ def test_tx_block_info_testnet(grpcclient: GRPCClient):
     assert bi.baker == 5
     assert bi.hash == block_hash
     assert bi.height == 3822240
-    # assert (
+
+
+def test_tx_block_info_random(grpcclient: GRPCClient):
+    block_hash = "4033add0adee832883f0144517cfb82fd25823898273e8b8dc8854313325760b"
+
+    net = NET.TESTNET
+    bi = grpcclient.get_block_info(block_hash, net=net)
+    print(bi)
+    # assert bi.baker == 5
+    # assert bi.hash == block_hash
+    # assert bi.height == 3822240
+    # # assert (
     #     bi.last_finalized_block
     #     == "946cfc98e6c64a3102d5fce8f326f725104004e6405d9aadd543ef83b7eeef12"
     # )
@@ -121,4 +132,4 @@ def test_tx_block_info_testnet(grpcclient: GRPCClient):
     # assert bi.transactions_energy_cost == 4455
     # assert bi.transactions_size == 1494
 
-    print(bi.dict(exclude_none=True))
+    # print(bi.dict(exclude_none=True))

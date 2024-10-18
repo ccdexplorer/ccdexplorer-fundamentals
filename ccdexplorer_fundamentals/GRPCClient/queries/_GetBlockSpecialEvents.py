@@ -57,7 +57,7 @@ class Mixin(_SharedConverters):
         for descriptor in message.DESCRIPTOR.fields:
             key, value = self.get_key_value_from_descriptor(descriptor, message)
 
-            if type(value) == BlockSpecialEvent.AccountAmounts:
+            if type(value) is BlockSpecialEvent.AccountAmounts:
                 result[key] = self.convertAccountAmountsBakingRewards(value)
 
             elif type(value) in self.simple_types:
@@ -72,7 +72,7 @@ class Mixin(_SharedConverters):
         for descriptor in message.DESCRIPTOR.fields:
             key, value = self.get_key_value_from_descriptor(descriptor, message)
 
-            if type(value) == BlockSpecialEvent.AccountAmounts:
+            if type(value) is BlockSpecialEvent.AccountAmounts:
                 result[key] = self.convertAccountAmountsFinalizationRewards(value)
 
             elif type(value) in self.simple_types:
@@ -109,10 +109,10 @@ class Mixin(_SharedConverters):
                     ]:
                         result[key] = self.convertTypeWithSingleValues(value)
 
-                    elif type(value) == BlockSpecialEvent.BakingRewards:
+                    elif type(value) is BlockSpecialEvent.BakingRewards:
                         result[key] = self.convertBakingRewards(value)
 
-                    elif type(value) == BlockSpecialEvent.FinalizationRewards:
+                    elif type(value) is BlockSpecialEvent.FinalizationRewards:
                         result[key] = self.convertFinalizationRewards(value)
 
             events.append(CCD_BlockSpecialEvent(**result))

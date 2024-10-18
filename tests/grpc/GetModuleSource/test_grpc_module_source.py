@@ -2,6 +2,7 @@ import pytest
 import datetime as dt
 import sys
 import os
+from ccdexplorer_fundamentals.enums import NET
 
 sys.path.append(os.path.dirname("ccdexplorer_fundamentals"))
 from ccdexplorer_fundamentals.GRPCClient import GRPCClient
@@ -82,3 +83,17 @@ def test_module_source_v1(grpcclient: GRPCClient):
     #     ii.v0.source_module
     #     == "d571155b495c0f9e6f56ae54a51c014ba2cc6895bdad337e2968b7b297066c11"
     # )
+
+
+def test_module_source_8901(grpcclient: GRPCClient):
+    block_hash = "last_final"
+    module_ref = "7f24e586bb7dcac318ca0c2876d3e4b5c07f36d48d0c7b20f8d82dad0552f1e3"
+    ms = grpcclient.get_module_source(module_ref, block_hash, NET.TESTNET)
+    bs = io.BytesIO(bytes.fromhex(ms.v1))
+    #
+    module = wadze.parse_module(bs.read())
+    # print(module.keys())
+    # print(module["type"])
+    # print(module["memory"])
+    # print(module["import"])
+    print(module)

@@ -61,6 +61,7 @@ class OpenStatus(Enum):
     closed_for_new = 1
     closed_for_all = 2
 
+
 class CoolDownStatus(Enum):
     COOLDOWN = 0
     PRE_COOLDOWN = 1
@@ -998,10 +999,12 @@ class CCD_EncryptedBalance(BaseModel):
     num_aggregated: Optional[int] = None
     incoming_amounts: list[CCD_EncryptedAmount]
 
+
 class CCD_Cooldown(BaseModel):
     end_time: CCD_TimeStamp
     amount: microCCD
     status: CoolDownStatus
+
 
 class CCD_AccountInfo(BaseModel):
     address: str

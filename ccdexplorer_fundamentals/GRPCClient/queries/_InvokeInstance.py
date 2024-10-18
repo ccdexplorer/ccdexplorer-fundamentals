@@ -34,7 +34,7 @@ class Mixin(_SharedConverters):
         result = {}
         for descriptor in message.DESCRIPTOR.fields:
             key, value = self.get_key_value_from_descriptor(descriptor, message)
-            if type(value) == RejectReason:
+            if type(value) is RejectReason:
                 result[key], _ = self.convertRejectReason(value)
 
             elif type(value) in self.simple_types:
@@ -70,10 +70,10 @@ class Mixin(_SharedConverters):
                 descriptor, grpc_return_value
             )
 
-            if type(value) == InvokeInstanceResponse.Success:
+            if type(value) is InvokeInstanceResponse.Success:
                 result[key] = self.convertSuccess(value)
 
-            elif type(value) == InvokeInstanceResponse.Failure:
+            elif type(value) is InvokeInstanceResponse.Failure:
                 result[key] = self.convertFailure(value)
 
         return CCD_InvokeInstanceResponse(**result)

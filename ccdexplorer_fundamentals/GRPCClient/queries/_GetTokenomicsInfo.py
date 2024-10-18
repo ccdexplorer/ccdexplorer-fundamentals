@@ -42,7 +42,7 @@ class Mixin(_SharedConverters):
                 if type(value) in self.simple_types:
                     result[key] = self.convertType(value)
 
-                elif type(value) == MintRate:
+                elif type(value) is MintRate:
                     result[key] = CCD_MintRate(
                         **{"mantissa": value.mantissa, "exponent": value.exponent}
                     )
@@ -67,9 +67,9 @@ class Mixin(_SharedConverters):
                 descriptor, grpc_return_value
             )
 
-            if type(value) == TokenomicsInfo.V0:
+            if type(value) is TokenomicsInfo.V0:
                 result[f"{prefix}{key}"] = self.convertTokenomicsV0(value)
-            elif type(value) == TokenomicsInfo.V1:
+            elif type(value) is TokenomicsInfo.V1:
                 result[f"{prefix}{key}"] = self.convertTokenomicsV1(value)
 
         return CCD_TokenomicsInfo(**result)

@@ -46,7 +46,7 @@ class Mixin(_SharedConverters):
                 if self.valueIsEmpty(value):
                     pass
                 else:
-                    if type(value) == UpdatePayload:
+                    if type(value) is UpdatePayload:
                         result[key], _type = self.convertUpdatePayload(value)
 
                     elif type(value) in self.simple_types:
@@ -73,7 +73,7 @@ class Mixin(_SharedConverters):
                 if self.valueIsEmpty(value):
                     pass
                 else:
-                    if type(value) == ExchangeRate:
+                    if type(value) is ExchangeRate:
                         value_as_dict = MessageToDict(value)
                         result[key] = CCD_ExchangeRate(
                             **{
@@ -85,53 +85,53 @@ class Mixin(_SharedConverters):
                     elif type(value) in [BakerStakeThreshold, ProtocolUpdate]:
                         result[key] = self.convertTypeWithSingleValues(value)
 
-                    elif type(value) == Level1Update:
+                    elif type(value) is Level1Update:
                         result[key] = self.convertLevel1Update(value)
 
-                    elif type(value) == IpInfo:
+                    elif type(value) is IpInfo:
                         result[key] = self.convertIpInfo(value)
 
                     elif type(value) in self.simple_types:
                         result[key] = self.convertType(value)
 
                     # TODO: no test available
-                    elif type(value) == ElectionDifficulty:
+                    elif type(value) is ElectionDifficulty:
                         result[key] = self.convertElectionDifficulty(value)
 
                     # TODO: no test available
-                    elif type(value) == MintDistributionCpv0:
+                    elif type(value) is MintDistributionCpv0:
                         result[key] = self.convertMintDistributionCpv0(value)
 
                     # TODO: no test available
-                    elif type(value) == TransactionFeeDistribution:
+                    elif type(value) is TransactionFeeDistribution:
                         result[key] = self.convertTransactionFeeDistribution(value)
 
                     # TODO: no test available
-                    elif type(value) == GasRewards:
+                    elif type(value) is GasRewards:
                         result[key] = self.convertGasRewards(value)
 
                     # TODO: no test available
-                    elif type(value) == RootUpdate:
+                    elif type(value) is RootUpdate:
                         result[key] = self.convertRootUpdate(value)
 
                     # TODO: no test available
-                    elif type(value) == ArInfo:
+                    elif type(value) is ArInfo:
                         result[key] = self.convertArInfo(value)
 
                     # TODO: no test available
-                    elif type(value) == CooldownParametersCpv1:
+                    elif type(value) is CooldownParametersCpv1:
                         result[key] = self.convertCooldownParametersCpv1(value)
 
                     # TODO: no test available
-                    elif type(value) == PoolParametersCpv1:
+                    elif type(value) is PoolParametersCpv1:
                         result[key] = self.convertPoolParametersCpv1(value)
 
                     # TODO: no test available
-                    elif type(value) == TimeParametersCpv1:
+                    elif type(value) is TimeParametersCpv1:
                         result[key] = self.convertTimeParametersCpv1(value)
 
                     # TODO: no test available
-                    elif type(value) == MintDistributionCpv1:
+                    elif type(value) is MintDistributionCpv1:
                         result[key] = self.convertMintDistributionCpv1(value)
             events.append(CCD_BlockSpecialEvent(**result))
 

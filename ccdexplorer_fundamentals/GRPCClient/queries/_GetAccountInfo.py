@@ -85,7 +85,7 @@ class Mixin(_SharedConverters):
             if key == "attributes":
                 result[key] = self.convertPolicy_AttributesEntry(value)
 
-            elif type(value) == YearMonth:
+            elif type(value) is YearMonth:
                 result[key] = self.convertYearMonth(value)
 
         return CCD_Policy(**result)
@@ -122,12 +122,12 @@ class Mixin(_SharedConverters):
             if type(value) in self.simple_types:
                 result[key] = self.convertType(value)
 
-            elif type(value) == CredentialPublicKeys:
+            elif type(value) is CredentialPublicKeys:
                 result["credential_public_keys"] = self.convertCredentialPublicKeys(
                     value
                 )
 
-            elif type(value) == Policy:
+            elif type(value) is Policy:
                 result[key] = self.convertPolicy(value)
 
         return CCD_InitialCredentialValues(**result)
@@ -140,7 +140,7 @@ class Mixin(_SharedConverters):
             if type(value) in self.simple_types:
                 result[key] = self.convertType(value)
 
-            elif type(value) == CredentialPublicKeys:
+            elif type(value) is CredentialPublicKeys:
                 result["credential_public_keys"] = self.convertCredentialPublicKeys(
                     value
                 )
@@ -148,10 +148,10 @@ class Mixin(_SharedConverters):
             elif key == "ar_data":
                 result[key] = self.convertArData(value)
 
-            elif type(value) == Policy:
+            elif type(value) is Policy:
                 result[key] = self.convertPolicy(value)
 
-            elif type(value) == CredentialCommitments:
+            elif type(value) is CredentialCommitments:
                 result[key] = self.convertCredentialCommitments(value)
 
         return CCD_NormalCredentialValues(**result)
@@ -244,13 +244,13 @@ class Mixin(_SharedConverters):
                     if type(value) in self.simple_types:
                         result[key] = self.convertType(value)
 
-                    elif type(value) == BakerPoolInfo:
+                    elif type(value) is BakerPoolInfo:
                         result[key] = self.convertBakerPoolInfo(value)
 
-                    elif type(value) == BakerInfo:
+                    elif type(value) is BakerInfo:
                         result[key] = self.convertBakerInfo(value)
 
-                    elif type(value) == StakePendingChange:
+                    elif type(value) is StakePendingChange:
                         result[key] = self.convertPendingChange(value)
 
             elif which_one == "delegator":
@@ -269,10 +269,10 @@ class Mixin(_SharedConverters):
                     ]:
                         result[key] = self.convertType(value)
 
-                    elif type(value) == DelegationTarget:
+                    elif type(value) is DelegationTarget:
                         result[key] = self.convertDelegationTarget(value)
 
-                    elif type(value) == StakePendingChange:
+                    elif type(value) is StakePendingChange:
                         result[key] = self.convertPendingChange(value)
 
             return CCD_AccountStakingInfo(**{which_one: result})

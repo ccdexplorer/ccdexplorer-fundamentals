@@ -39,7 +39,7 @@ class Mixin(_SharedConverters):
             if type(value) in self.simple_types:
                 result[key_to_store] = self.convertType(value)
 
-            elif type(value) == CommissionRates:
+            elif type(value) is CommissionRates:
                 result[key] = self.convertCommissionRates(value)
 
         return CCD_PassiveDelegationInfo(**result)

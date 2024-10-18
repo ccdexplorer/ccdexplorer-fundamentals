@@ -16,9 +16,8 @@ def grpcclient():
 
 # @pytest.mark.skip(reason="Finalized blocks is a stream that never ends...")
 def test_arrived_block_info(grpcclient: GRPCClient):
-    while True:
-        bi = grpcclient.get_blocks()
-        print(bi)
+    bi = grpcclient.get_blocks()
+    print(bi)
 
     grpcclient.get_finalized_blocks()
 
