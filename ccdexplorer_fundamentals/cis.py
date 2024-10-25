@@ -90,6 +90,8 @@ class MongoTypeLoggedEvent(BaseModel):
     token_address: str
     contract: str
     date: Optional[str] = None
+    to_address_canonical: Optional[str] = None
+    from_address_canonical: Optional[str] = None
 
 
 class MongoTypeTokensTag(BaseModel):
@@ -607,6 +609,10 @@ class CIS:
                 "contract": instance_address,
                 "date": f"{slot_time:%Y-%m-%d}",
             }
+            if "to_address" in result_dict:
+                d.update({"to_address_canonical": result_dict["to_address"][:29]})
+            if "from_address" in result_dict:
+                d.update({"from_address_canonical": result_dict["from_address"][:29]})
             return (
                 MongoTypeLoggedEvent(**d),
                 ReplaceOne(
