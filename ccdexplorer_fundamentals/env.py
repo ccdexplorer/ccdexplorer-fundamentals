@@ -15,12 +15,12 @@ MONGO_URI = os.environ.get("MONGO_URI")
 ADMIN_CHAT_ID = os.environ.get("ADMIN_CHAT_ID")
 MAILTO_LINK = os.environ.get("MAILTO_LINK")
 MAILTO_USER = os.environ.get("MAILTO_USER")
-if not os.environ["GRPC_MAINNET"]:
+if not os.environ.get("GRPC_MAINNET"):
     GRPC_MAINNET = []
 else:
     GRPC_MAINNET = ast.literal_eval(os.environ["GRPC_MAINNET"])
 
-if not os.environ["GRPC_TESTNET"]:
+if not os.environ.get("GRPC_TESTNET"):
     GRPC_TESTNET = []
 else:
     GRPC_TESTNET = ast.literal_eval(os.environ["GRPC_TESTNET"])
