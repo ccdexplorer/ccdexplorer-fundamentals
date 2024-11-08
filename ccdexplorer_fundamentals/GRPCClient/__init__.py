@@ -152,9 +152,10 @@ class GRPCClient(
         self.hosts = {}
         self.hosts[NET.MAINNET] = GRPC_MAINNET
         self.hosts[NET.TESTNET] = GRPC_TESTNET
-        self.connect()
-        self.check_connection(NET.MAINNET)
-        self.check_connection(NET.TESTNET)
+        if len(GRPC_MAINNET) > 0:
+            self.connect()
+            self.check_connection(NET.MAINNET)
+            self.check_connection(NET.TESTNET)
 
     def connect(self):
         host = self.hosts[NET.MAINNET][self.host_index[NET.MAINNET]]["host"]
