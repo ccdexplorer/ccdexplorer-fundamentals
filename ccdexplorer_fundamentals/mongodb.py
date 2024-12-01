@@ -163,6 +163,15 @@ class MongoTypeInvolvedContract(BaseModel):
     source_module: str
 
 
+class ModuleVerification(BaseModel):
+    verified: bool
+    build_image_used: str
+    build_command_used: str
+    archive_hash: str
+    link_to_source_code: str
+    source_code_at_verification_time: str
+
+
 class MongoTypeModule(BaseModel):
     """
     Module. This type is stored in the collection `modules`.
@@ -171,7 +180,7 @@ class MongoTypeModule(BaseModel):
     - `_id`: the hex string
     - `module_name`: the name from the module
     - `methods`: list of method names
-    - `contracts`: list of contract instances from this module
+    # - `contracts`: list of contract instances from this module
     """
 
     id: str = Field(..., alias="_id")
@@ -179,6 +188,7 @@ class MongoTypeModule(BaseModel):
     methods: Optional[list[str]] = None
     contracts: Optional[list[str]] = None
     init_date: Optional[dt.datetime] = None
+    verification: Optional[ModuleVerification] = None
 
 
 class MongoTypeInstance(BaseModel):
@@ -356,6 +366,7 @@ class Collections(Enum):
     tokens_token_addresses_v2 = "tokens_token_addresses_v2"
     tokens_tags = "tokens_tags"
     tokens_logged_events = "tokens_logged_events"
+    tokens_logged_events_v2 = "tokens_logged_events_v2"
     tokens_token_addresses = "tokens_token_addresses"
     memos_to_hashes = "memos_to_hashes"
     credentials_issuers = "credentials_issuers"
