@@ -779,8 +779,8 @@ class CIS:
             support = support_result == 1
         return support
 
-    def balanceOf(self, block_hash: str, tokenID: str, account_id: str):
-        parameter_bytes = self.balanceOfParameter(tokenID, account_id)
+    def balanceOf(self, block_hash: str, tokenID: str, addresses: list[str]):
+        parameter_bytes = self.balanceOfParameter(tokenID, addresses)
 
         ii = self.grpcclient.invoke_instance(
             block_hash,
@@ -873,21 +873,23 @@ class CIS:
         sp.write(address)
         return sp.getvalue()
 
-    def balanceOfParameter(self, tokenID: str, address: str):
+    def balanceOfParameter(self, tokenID: str, addresses: list[str]):
         sp = io.BytesIO()
-
-        sp.write(int(1).to_bytes(2, "little"))
-        sp.write(self.balanceOfQuery(tokenID, address))
+        sp.write(int(len(addresses)).to_bytes(2, "little"))
+        for address in addresses:
+            sp.write(self.balanceOfQuery(tokenID, address))
         # convert to bytes
         return sp.getvalue()
 
     def balanceOfResponse(self, res: bytes):
         bs = io.BytesIO(bytes.fromhex(res.decode()))
         n = int.from_bytes(bs.read(2), byteorder="little")
-        print(n)
-        result = self.token_amount(bs)
 
-        return result
+        results = []
+        for _ in range(n):
+            results.append(self.token_amount(bs))
+
+        return results
 
     def generate_tokenID(self, tokenID: str):
         sp = io.BytesIO()
@@ -900,12 +902,12 @@ class CIS:
         return bytearray(base58.b58decode_check(address)[1:])
 
     def generate_contract_address(self, address: str):
-        # TODO
+        contract_address = CCD_ContractAddress.from_str(address)
+
         sp = io.BytesIO()
+        sp.write(int(contract_address.index).to_bytes(8, "little"))
+        sp.write(int(contract_address.subindex).to_bytes(8, "little"))
 
-        address_in_bytes = bytes.fromhex(address.encode("utf-8"))
-
-        sp.write(address_in_bytes)
         return sp.getvalue()
 
     def generate_address(self, address: str):

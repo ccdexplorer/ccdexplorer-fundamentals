@@ -82,7 +82,8 @@ class MongoTokensImpactedAddress(BaseModel):
     impacted_address: str
     impacted_address_canonical: str
     event_type: str
-    token_address: str
+    token_address: Optional[str] = None
+    contract: Optional[str] = None
     block_height: int
     date: str
 
