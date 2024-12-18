@@ -505,6 +505,33 @@ def test_invoke_instance_balanceOf_1856(grpcclient: GRPCClient):
     assert rr == 1
 
 
+def test_invoke_instance_balanceOf_EUROe(grpcclient: GRPCClient):
+    block_hash = "last_final"
+    instance_index = 9390
+    instance_subindex = 0
+    entrypoint = "euroe_stablecoin.balanceOf"
+    tokenID = ""
+    addresses = [
+        "<9363,0>",
+        "3oBosgGonmJYYUmEAtbPEuqiYcciLc1vqiQSJYa71SceEd8Zri",
+        "3Xu1Lwkwyb1pGGquKiU8bSf3DZV9Rk6mE5KshYjUgdga8Jy3aD",
+        "3qqr3uUHrLqYzTm4Ap5dxJpeovMvmRUQVN2wUj3ChMqLmU31Ua",
+        "4hGN68SeYn9ZPSABU3uhS8nh8Tkv13DW2AmdZCneBzVkzeZ5Zp",
+        "3suZfxcME62akyyss72hjNhkzXeZuyhoyQz1tvNSXY2yxvwo53",
+    ]
+    ci = CIS(grpcclient, instance_index, instance_subindex, entrypoint, NET.MAINNET)
+    rr, ii = ci.balanceOf(block_hash, tokenID, addresses)
+
+    if ii.failure.used_energy > 0:
+        print(ii.failure)
+    else:
+        for index, address in enumerate(addresses):
+            print(
+                f"{address} has {rr[index]} tokens from <{instance_index},{instance_subindex}>-{tokenID}."
+            )
+        # print(ii.success)
+
+
 def test_list_cis2_instances(grpcclient: GRPCClient):
     block_hash = "last_final"
     il = grpcclient.get_instance_list(block_hash)
