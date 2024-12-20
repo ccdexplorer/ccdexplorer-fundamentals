@@ -556,3 +556,55 @@ def test_list_cis2_instances(grpcclient: GRPCClient):
     support_result = ci.support_result(res)
     print(support_result)
     print(ii.dict(exclude_none=True))
+
+
+def test_invoke_instance_balanceOf_CIS5(grpcclient: GRPCClient):
+    block_hash = "last_final"
+    instance_index = 9632
+    instance_subindex = 0
+    entrypoint = "gateway_smart_wallet.ccdBalanceOf"
+
+    public_keys = [
+        "005aa6fcf725349d4f0d1aa8959d26317f0e997fa3b45a5e3178c571d9e1d622",
+        "b288c8518c8be158e5e22cb1ee8c748b1992a2cb3572643a7b6ceb1ccd6bf3ec",
+        "67eab74667a263f842f715fcf2c223d4815643eb61eed0ddd656d8e3087c6563",
+        "e7ce3cde50de74812b5a2c8575196e36e81c566c9d78ca05ce285b03450bcf3f",
+        "a7e49c1c18c45ccc3440ee02a145bc0b35a718d73bbe8658697f93abd10ee96e",
+    ]
+    ci = CIS(grpcclient, instance_index, instance_subindex, entrypoint, NET.MAINNET)
+    rr, ii = ci.CCDbalanceOf(block_hash, public_keys)
+
+    if ii.failure.used_energy > 0:
+        print(ii.failure)
+    else:
+        for index, address in enumerate(public_keys):
+            print(
+                f"{address} has {rr[index]} tokens from <{instance_index},{instance_subindex}>"
+            )
+        # print(ii.success)
+
+
+def test_invoke_instance_CIS2balanceOf_CIS5(grpcclient: GRPCClient):
+    block_hash = "last_final"
+    instance_index = 9632
+    instance_subindex = 0
+    entrypoint = "gateway_smart_wallet.cis2BalanceOf"
+    cis_2_contract = CCD_ContractAddress.from_index(9487, 0)
+    token_id = ""
+    public_keys = [
+        "005aa6fcf725349d4f0d1aa8959d26317f0e997fa3b45a5e3178c571d9e1d622",
+        "b288c8518c8be158e5e22cb1ee8c748b1992a2cb3572643a7b6ceb1ccd6bf3ec",
+        "67eab74667a263f842f715fcf2c223d4815643eb61eed0ddd656d8e3087c6563",
+        "b288c8518c8be158e5e22cb1ee8c748b1992a2cb3572643a7b6ceb1ccd6bf3ec",
+        "a7e49c1c18c45ccc3440ee02a145bc0b35a718d73bbe8658697f93abd10ee96e",
+        "4eacb875f06ce817263e9edfcd101776720000b96974c3aa9e5a8de28af20943",
+    ]
+    ci = CIS(grpcclient, instance_index, instance_subindex, entrypoint, NET.MAINNET)
+    rr, ii = ci.CIS2balanceOf(block_hash, cis_2_contract, token_id, public_keys)
+
+    if ii.failure.used_energy > 0:
+        print(ii.failure)
+    else:
+        for index, address in enumerate(public_keys):
+            print(f"{address} has {rr[index]} tokens from {cis_2_contract.to_str()}")
+        # print(ii.success)

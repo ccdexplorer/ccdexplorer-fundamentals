@@ -380,6 +380,7 @@ class Collections(Enum):
     pre_tokens_by_address = "pre_tokens_by_address"
     statistics = "statistics"
     pre_render = "pre_render"
+    cis5_public_keys_contracts = "cis5_public_keys_contracts"
 
     # addresses and contracts per net per usecase
     projects = "projects"

@@ -278,6 +278,9 @@ class CIS:
         self.grpcclient = grpcclient
         self.instance_index = instance_index
         self.instance_subindex = instance_subindex
+        self.contract_as_str = CCD_ContractAddress.from_index(
+            instance_index, instance_subindex
+        ).to_str()
         self.entrypoint = entrypoint
         self.net = net
 
@@ -779,6 +782,7 @@ class CIS:
             support = support_result == 1
         return support
 
+    # CIS-2
     def balanceOf(self, block_hash: str, tokenID: str, addresses: list[str]):
         parameter_bytes = self.balanceOfParameter(tokenID, addresses)
 
@@ -793,6 +797,49 @@ class CIS:
 
         res = ii.success.return_value
         support_result = self.balanceOfResponse(res)
+
+        return support_result, ii
+
+    # CIS-5
+    def CCDbalanceOf(self, block_hash: str, public_keys: list[str]):
+        parameter_bytes = self.CCDbalanceOfParameter(public_keys)
+
+        ii = self.grpcclient.invoke_instance(
+            block_hash,
+            self.instance_index,
+            self.instance_subindex,
+            self.entrypoint,
+            parameter_bytes,
+            self.net,
+        )
+
+        res = ii.success.return_value
+        support_result = self.CCDbalanceOfResponse(res)
+
+        return support_result, ii
+
+    def CIS2balanceOf(
+        self,
+        block_hash: str,
+        cis2_contract: CCD_ContractAddress,
+        token_id: str,
+        public_keys: list[str],
+    ):
+        parameter_bytes = self.CIS2balanceOfParameter(
+            cis2_contract, token_id, public_keys
+        )
+
+        ii = self.grpcclient.invoke_instance(
+            block_hash,
+            self.instance_index,
+            self.instance_subindex,
+            self.entrypoint,
+            parameter_bytes,
+            self.net,
+        )
+
+        res = ii.success.return_value
+        support_result = self.CIS2balanceOfResponse(res)
 
         return support_result, ii
 
@@ -873,13 +920,62 @@ class CIS:
         sp.write(address)
         return sp.getvalue()
 
-    def balanceOfParameter(self, tokenID: str, addresses: list[str]):
+    def CIS2balanceOfQuery(
+        self, cis2_contract: CCD_ContractAddress, tokenID: str, public_key: str
+    ):
+        sp = io.BytesIO()
+
+        tokenID = self.generate_tokenID(tokenID)
+        contract_ = self.generate_contract_address(cis2_contract.to_str())
+        public_key_ = self.generate_public_key_ed25519(public_key)
+
+        sp.write(tokenID)
+        sp.write(contract_)
+        sp.write(public_key_)
+        return sp.getvalue()
+
+    def CIS2balanceOfParameter(
+        self, cis2_contract: CCD_ContractAddress, token_id: str, public_keys: list[str]
+    ) -> bytes:
+        sp = io.BytesIO()
+        sp.write(int(len(public_keys)).to_bytes(2, "little"))
+        for public_key in public_keys:
+            sp.write(self.CIS2balanceOfQuery(cis2_contract, token_id, public_key))
+        return sp.getvalue()
+
+    def CCDbalanceOfParameter(self, public_keys: list[str]) -> bytes:
+        sp = io.BytesIO()
+        sp.write(int(len(public_keys)).to_bytes(2, "little"))
+        for public_key in public_keys:
+            sp.write(self.generate_public_key_ed25519(public_key))
+        return sp.getvalue()
+
+    def balanceOfParameter(self, tokenID: str, addresses: list[str]) -> bytes:
         sp = io.BytesIO()
         sp.write(int(len(addresses)).to_bytes(2, "little"))
         for address in addresses:
             sp.write(self.balanceOfQuery(tokenID, address))
-        # convert to bytes
         return sp.getvalue()
+
+    def CIS2balanceOfResponse(self, res: bytes):
+        bs = io.BytesIO(bytes.fromhex(res.decode()))
+        n = int.from_bytes(bs.read(2), byteorder="little")
+
+        results = []
+        for _ in range(n):
+            results.append(self.token_amount(bs))
+
+        return results
+
+    def CCDbalanceOfResponse(self, res: bytes):
+        bs = io.BytesIO(bytes.fromhex(res.decode()))
+        n = int.from_bytes(bs.read(2), byteorder="little")
+
+        results = []
+        for _ in range(n):
+            results.append(self.ccd_amount(bs))
+
+        return results
 
     def balanceOfResponse(self, res: bytes):
         bs = io.BytesIO(bytes.fromhex(res.decode()))
@@ -890,6 +986,12 @@ class CIS:
             results.append(self.token_amount(bs))
 
         return results
+
+    def generate_public_key_ed25519(self, public_key: str):
+        sp = io.BytesIO()
+        public_key_in_bytes = bytes.fromhex(public_key)
+        sp.write(public_key_in_bytes)
+        return sp.getvalue()
 
     def generate_tokenID(self, tokenID: str):
         sp = io.BytesIO()
@@ -1043,6 +1145,12 @@ class CIS:
             return "Register"
         elif n == 1:
             return "Remove"
+
+    def ccd_amount(self, bs: io.BytesIO) -> int:
+        return int.from_bytes(bs.read(8), byteorder="little")
+
+    def public_key_ed25519(self, bs: io.BytesIO) -> str:
+        return bytes.hex(bs.read(32))
 
     def transferEvent(self, hexParameter: str):
         bs = io.BytesIO(bytes.fromhex(hexParameter))
