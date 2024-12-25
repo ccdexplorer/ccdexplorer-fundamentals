@@ -126,10 +126,7 @@ def test_checksum_aesirx(grpcclient: GRPCClient):
     tag, result = ci.process_log_events(event.updated.events[1])
     result: tokenMetadataEvent
     assert tag == 251
-    assert (
-        result.token_id
-        == "01288764e78695027bd972e9b654cde28df2563e56b3ed66a4c8f4dcb3c08cec"
-    )
+    assert result.token_id == "00000873"
     assert result.metadata.checksum is None
 
 
@@ -143,11 +140,11 @@ def test_checksum_other(grpcclient: GRPCClient):
     tag, result = ci.process_log_events(event.updated.events[1])
     result: tokenMetadataEvent
     assert tag == 251
+    assert result.token_id == "05"
     assert (
-        result.token_id
-        == "01288764e78695027bd972e9b654cde28df2563e56b3ed66a4c8f4dcb3c08cec"
+        result.metadata.checksum
+        == "f982b4603b9c116598d381d1aee90a7b5332377b209b6bbd8d7a4dfab18f2a80"
     )
-    assert result.metadata.checksum is None
 
 
 def test_checksum_other2(grpcclient: GRPCClient):
@@ -161,7 +158,10 @@ def test_checksum_other2(grpcclient: GRPCClient):
     result: tokenMetadataEvent
     assert tag == 251
     assert result.token_id == "25"
-    assert result.metadata.checksum is None
+    assert (
+        result.metadata.checksum
+        == "4ea5c508a6566e76240543f8feb06fd457777be39549c4016436afda65d2330e"
+    )
 
 
 def get_schema_from_source(

@@ -1,58 +1,30 @@
 from __future__ import annotations
-from pydantic import BaseModel, Field, ConfigDict
+
 import datetime as dt
-from typing import Union, Optional
-from enum import Enum
 import io
+from enum import Enum
+from typing import Optional, Any
+
 import base58
-from ccdexplorer_fundamentals.GRPCClient import GRPCClient
-from ccdexplorer_fundamentals.GRPCClient.CCD_Types import *  # noqa: F403
-from ccdexplorer_fundamentals.mongodb import Collections
-from pymongo.collection import Collection
+import leb128
+from pydantic import BaseModel, ConfigDict, Field
 from pymongo import ReplaceOne
-from ccdexplorer_fundamentals.enums import NET
+from pymongo.collection import Collection
 from rich.console import Console
 
-# import math
-import leb128
+from ccdexplorer_fundamentals.enums import NET
+from ccdexplorer_fundamentals.GRPCClient import GRPCClient
+from ccdexplorer_fundamentals.GRPCClient.CCD_Types import (
+    CCD_AccountAddress,
+    CCD_ContractAddress,
+    CCD_BlockItemSummary,
+    microCCD,
+)
+from ccdexplorer_fundamentals.mongodb import Collections
 
 console = Console()
 
 LEN_ACCOUNT_ADDRESS = 50
-
-
-# Metadata classes
-class TokenAttribute(BaseModel):
-    model_config = ConfigDict(coerce_numbers_to_str=True)
-    type: Optional[str] = None
-    name: Optional[str] = None
-    value: Optional[str] = None
-
-
-class TokenURLJSON(BaseModel):
-    model_config = ConfigDict(coerce_numbers_to_str=True)
-    url: Optional[str] = None
-    hash: Optional[str] = None
-
-
-class TokenMetaData(BaseModel):
-    model_config = ConfigDict(coerce_numbers_to_str=True)
-    name: Optional[str] = None
-    symbol: Optional[str] = None
-    unique: Optional[bool] = None
-    decimals: Optional[int] = None
-    description: Optional[str] = None
-    thumbnail: Optional[TokenURLJSON] = None
-    display: Optional[TokenURLJSON] = None
-    artifact: Optional[TokenURLJSON] = None
-    assets: Optional[list[TokenMetaData]] = None
-    attributes: Optional[list[TokenAttribute]] = None
-    localization: Optional[dict[str, TokenURLJSON]] = None
-
-
-# class MongoTypeTokenHolder(BaseModel):
-#     account_address: CCD_AccountAddress
-#     token_amount: str
 
 
 class MongoTypeTokenForAddress(BaseModel):
@@ -134,7 +106,53 @@ class MongoTypeTokenAddress(BaseModel):
     hidden: Optional[bool] = None
 
 
+class CISProcessEventRequest(BaseModel):
+    tx: CCD_BlockItemSummary
+    event_index: int  # this is the index of events from either contract_initialized of contract_update_issued
+    standard: Optional[StandardIdentifiers] = None  # None for unrecognized events
+    instance_address: str
+    event: str
+    event_name: Optional[str] = None  # None for unrecognized events
+    tag: int
+    recognized_event: Optional[Any] = None  # None for unrecognized events
+    effect_type: Optional[str] = (
+        None  # for contract_update_issued, these are either interrupted or updated
+    )
+    effect_index: int = 0  # its index in the list
+
+
 # CIS
+
+
+# CIS-2 Metadata classes
+class TokenAttribute(BaseModel):
+    model_config = ConfigDict(coerce_numbers_to_str=True)
+    type: Optional[str] = None
+    name: Optional[str] = None
+    value: Optional[str] = None
+
+
+class TokenURLJSON(BaseModel):
+    model_config = ConfigDict(coerce_numbers_to_str=True)
+    url: Optional[str] = None
+    hash: Optional[str] = None
+
+
+class TokenMetaData(BaseModel):
+    model_config = ConfigDict(coerce_numbers_to_str=True)
+    name: Optional[str] = None
+    symbol: Optional[str] = None
+    unique: Optional[bool] = None
+    decimals: Optional[int] = None
+    description: Optional[str] = None
+    thumbnail: Optional[TokenURLJSON] = None
+    display: Optional[TokenURLJSON] = None
+    artifact: Optional[TokenURLJSON] = None
+    assets: Optional[list[TokenMetaData]] = None
+    attributes: Optional[list[TokenAttribute]] = None
+    localization: Optional[dict[str, TokenURLJSON]] = None
+
+
 class StandardIdentifiers(Enum):
     CIS_0 = "CIS-0"
     CIS_1 = "CIS-1"
@@ -160,6 +178,53 @@ class LoggedEvents(Enum):
     recovation_key_event = 244
     item_created_event = 237
     item_status_changed = 236
+
+
+class LEEventInfo(BaseModel):
+    contract: Optional[str] = None
+    standard: Optional[str] = None
+    logged_event: str
+    effect_index: int
+    event_index: int
+    event_type: Optional[str] = None
+    token_address: Optional[str] = None
+
+
+class LETxInfo(BaseModel):
+    date: str
+    tx_hash: str
+    tx_index: int
+    block_height: int
+
+
+class MongoTypeLoggedEventV2(BaseModel):
+    id: str = Field(..., alias="_id")
+    event_info: LEEventInfo
+    tx_info: LETxInfo
+    recognized_event: Optional[
+        mintEvent
+        | transferEvent
+        | burnEvent
+        | updateOperatorEvent
+        | tokenMetadataEvent
+        | registerCredentialEvent
+        | revokeCredentialEvent
+        | issuerMetadataEvent
+        | credentialMetadataEvent
+        | credentialSchemaRefEvent
+        | revocationKeyEvent
+        | itemCreatedEvent
+        | itemStatusChangedEvent
+        | nonceEvent
+        | depositCCDEvent
+        | depositCIS2TokensEvent
+        | transferCCDEvent
+        | transferCIS2TokensEvent
+        | withdrawCCDEvent
+        | withdrawCIS2TokensEvent
+    ] = None
+    to_address_canonical: Optional[str] = None
+    from_address_canonical: Optional[str] = None
 
 
 # CIS-2 Logged Event Types
@@ -232,6 +297,7 @@ class credentialSchemaRefEvent(BaseModel):
 
 class revocationKeyEvent(BaseModel):
     tag: int
+    public_key_ed25519: Optional[str] = None
     action: Optional[str] = None
 
 
@@ -250,20 +316,68 @@ class itemCreatedEvent(BaseModel):
     tag: int
     item_id: str
     metadata: MetadataUrl
-    initial_status: str
+    initial_status: str | int
 
 
 class itemStatusChangedEvent(BaseModel):
     tag: int
     item_id: str
-    new_status: str
+    new_status: str | int
     additional_data: str
 
 
 class nonceEvent(BaseModel):
     tag: int
-    nonce: Optional[int] = None
+    nonce: Optional[str] = None
     sponsoree: Optional[str] = None
+
+
+class depositCCDEvent(BaseModel):
+    tag: int
+    ccd_amount: Optional[microCCD] = None
+    from_address: Optional[str] = None
+    to_public_key_ed25519: Optional[str] = None
+
+
+class depositCIS2TokensEvent(BaseModel):
+    tag: int
+    token_amount: Optional[int] = None
+    token_id: Optional[str] = None
+    cis2_token_contract_address: Optional[str] = None
+    from_address: Optional[str] = None
+    to_public_key_ed25519: Optional[str] = None
+
+
+class withdrawCCDEvent(BaseModel):
+    tag: int
+    ccd_amount: Optional[microCCD] = None
+    from_public_key_ed25519: Optional[str] = None
+    to_address: Optional[str] = None
+
+
+class withdrawCIS2TokensEvent(BaseModel):
+    tag: int
+    token_amount: Optional[int] = None
+    token_id: Optional[str] = None
+    cis2_token_contract_address: Optional[str] = None
+    from_public_key_ed25519: Optional[str] = None
+    to_address: Optional[str] = None
+
+
+class transferCCDEvent(BaseModel):
+    tag: int
+    ccd_amount: Optional[microCCD] = None
+    from_public_key_ed25519: Optional[str] = None
+    to_public_key_ed25519: Optional[str] = None
+
+
+class transferCIS2TokensEvent(BaseModel):
+    tag: int
+    token_amount: Optional[int] = None
+    token_id: Optional[str] = None
+    cis2_token_contract_address: Optional[str] = None
+    from_public_key_ed25519: Optional[str] = None
+    to_public_key_ed25519: Optional[str] = None
 
 
 class CIS:
@@ -278,13 +392,23 @@ class CIS:
         self.grpcclient = grpcclient
         self.instance_index = instance_index
         self.instance_subindex = instance_subindex
-        self.contract_as_str = CCD_ContractAddress.from_index(
-            instance_index, instance_subindex
-        ).to_str()
+        # self.contract_as_str = CCD_ContractAddress.from_index(
+        #     instance_index, instance_subindex
+        # ).to_str()
         self.entrypoint = entrypoint
         self.net = net
 
     ###############
+    def format_address(self, address):
+        if type(address) is not tuple:
+            # it's an account address
+            if len(address) != LEN_ACCOUNT_ADDRESS:
+                return None
+
+        if isinstance(address, tuple):
+            address = f"<{address[0]},{address[1]}>"
+
+        return address
 
     def execute_save(self, collection: Collection, replacement, _id: str):
         repl_dict = replacement.dict()
@@ -568,125 +692,125 @@ class CIS:
             )
             # exit
 
-    def formulate_logged_event(
-        self,
-        slot_time: dt.datetime,
-        tag_: int,
-        result: Union[
-            mintEvent, burnEvent, transferEvent, updateOperatorEvent, tokenMetadataEvent
-        ],
-        instance_address: str,
-        event: str,
-        height: int,
-        tx_hash: str,
-        tx_index: int,
-        ordering: int,
-        _id_postfix: str,
-    ) -> Union[ReplaceOne, None]:
-        if tag_ in [255, 254, 253, 252, 251, 250]:
-            if tag_ == 252:
-                token_address = f"{instance_address}-operator"
-            elif tag_ == 250:
-                token_address = f"{instance_address}-nonce"
-            else:
-                token_address = f"{instance_address}-{result.token_id}"
-            _id = f"{height}-{token_address}-{event}-{_id_postfix}"
-            if result:
-                result_dict = result.model_dump()
-            else:
-                result_dict = {}
-            if "token_amount" in result_dict:
-                result_dict["token_amount"] = str(result_dict["token_amount"])
+    # def formulate_logged_event(
+    #     self,
+    #     slot_time: dt.datetime,
+    #     tag_: int,
+    #     result: Union[
+    #         mintEvent, burnEvent, transferEvent, updateOperatorEvent, tokenMetadataEvent
+    #     ],
+    #     instance_address: str,
+    #     event: str,
+    #     height: int,
+    #     tx_hash: str,
+    #     tx_index: int,
+    #     ordering: int,
+    #     _id_postfix: str,
+    # ) -> Union[ReplaceOne, None]:
+    #     if tag_ in [255, 254, 253, 252, 251, 250]:
+    #         if tag_ == 252:
+    #             token_address = f"{instance_address}-operator"
+    #         elif tag_ == 250:
+    #             token_address = f"{instance_address}-nonce"
+    #         else:
+    #             token_address = f"{instance_address}-{result.token_id}"
+    #         _id = f"{height}-{token_address}-{event}-{_id_postfix}"
+    #         if result:
+    #             result_dict = result.model_dump()
+    #         else:
+    #             result_dict = {}
+    #         if "token_amount" in result_dict:
+    #             result_dict["token_amount"] = str(result_dict["token_amount"])
 
-            d = {
-                "_id": _id,
-                "logged_event": event,
-                "result": result_dict,
-                "tag": tag_,
-                "event_type": LoggedEvents(tag_).name,
-                "block_height": height,
-                "tx_hash": tx_hash,
-                "tx_index": tx_index,
-                "ordering": ordering,
-                "token_address": token_address,
-                "contract": instance_address,
-                "date": f"{slot_time:%Y-%m-%d}",
-            }
-            if "to_address" in result_dict:
-                d.update({"to_address_canonical": result_dict["to_address"][:29]})
-            if "from_address" in result_dict:
-                d.update({"from_address_canonical": result_dict["from_address"][:29]})
-            return (
-                MongoTypeLoggedEvent(**d),
-                ReplaceOne(
-                    {"_id": _id},
-                    replacement=d,
-                    upsert=True,
-                ),
-            )
+    #         d = {
+    #             "_id": _id,
+    #             "logged_event": event,
+    #             "result": result_dict,
+    #             "tag": tag_,
+    #             "event_type": LoggedEvents(tag_).name,
+    #             "block_height": height,
+    #             "tx_hash": tx_hash,
+    #             "tx_index": tx_index,
+    #             "ordering": ordering,
+    #             "token_address": token_address,
+    #             "contract": instance_address,
+    #             "date": f"{slot_time:%Y-%m-%d}",
+    #         }
+    #         if "to_address" in result_dict:
+    #             d.update({"to_address_canonical": result_dict["to_address"][:29]})
+    #         if "from_address" in result_dict:
+    #             d.update({"from_address_canonical": result_dict["from_address"][:29]})
+    #         return (
+    #             MongoTypeLoggedEvent(**d),
+    #             ReplaceOne(
+    #                 {"_id": _id},
+    #                 replacement=d,
+    #                 upsert=True,
+    #             ),
+    #         )
 
-        else:
-            return (None, None)
+    #     else:
+    #         return (None, None)
 
-    # not used
-    def execute_logged_event(
-        self,
-        db_to_use,
-        tag_: int,
-        result: Union[mintEvent, burnEvent, transferEvent, tokenMetadataEvent],
-        instance_address: str,
-        height: int,
-    ):
-        if tag_ == 255:
-            self.save_transfer(db_to_use, instance_address, result, height)
-        elif tag_ == 254:
-            self.save_mint(db_to_use, instance_address, result, height)
-        elif tag_ == 253:
-            self.save_burn(db_to_use, instance_address, result, height)
-        elif tag_ == 252:
-            pass
-            # we only save the logged event, but to not process this in
-            # token_address or accounts.
-            # save_operator(db_to_use, instance_address, result, height)
-        elif tag_ == 251:
-            self.save_metadata(db_to_use, instance_address, result, height)
-        elif tag_ == 250:
-            pass  # nonceEvent
+    # # not used
+    # def execute_logged_event(
+    #     self,
+    #     db_to_use,
+    #     tag_: int,
+    #     result: Union[mintEvent, burnEvent, transferEvent, tokenMetadataEvent],
+    #     instance_address: str,
+    #     height: int,
+    # ):
+    #     if tag_ == 255:
+    #         self.save_transfer(db_to_use, instance_address, result, height)
+    #     elif tag_ == 254:
+    #         self.save_mint(db_to_use, instance_address, result, height)
+    #     elif tag_ == 253:
+    #         self.save_burn(db_to_use, instance_address, result, height)
+    #     elif tag_ == 252:
+    #         pass
+    #         # we only save the logged event, but to not process this in
+    #         # token_address or accounts.
+    #         # save_operator(db_to_use, instance_address, result, height)
+    #     elif tag_ == 251:
+    #         self.save_metadata(db_to_use, instance_address, result, height)
+    #     elif tag_ == 250:
+    #         pass  # nonceEvent
 
-    def process_event(
-        self,
-        slot_time: dt.datetime,
-        instance_address: str,
-        event: str,
-        height: int,
-        tx_hash: str,
-        tx_index: int,
-        ordering: int,
-        _id_postfix: str,
-    ):
-        tag_, result = self.process_log_events(event)
-        logged_event = None
-        logged_event_for_queue = None
-        token_address = None
-        if result:
-            # if tag_ in [255, 254, 253, 252, 251, 250]:
-            if tag_ in [255, 254, 253, 251]:
-                token_address = f"{instance_address}-{result.token_id}"
+    # def process_event(
+    #     self,
+    #     slot_time: dt.datetime,
+    #     instance_address: str,
+    #     event: str,
+    #     height: int,
+    #     tx_hash: str,
+    #     tx_index: int,
+    #     ordering: int,
+    #     _id_postfix: str,
+    # ):
+    #     tag_, result = self.process_log_events(event)
+    #     logged_event = None
+    #     logged_event_for_queue = None
+    #     token_address = None
+    #     if result:
+    #         # if tag_ in [255, 254, 253, 252, 251, 250]:
+    #         if tag_ in [255, 254, 253, 251]:
+    #             token_address = f"{instance_address}-{result.token_id}"
 
-                (logged_event, logged_event_for_queue) = self.formulate_logged_event(
-                    slot_time,
-                    tag_,
-                    result,
-                    instance_address,
-                    event,
-                    height,
-                    tx_hash,
-                    tx_index,
-                    ordering,
-                    _id_postfix,
-                )
+    #             (logged_event, logged_event_for_queue) = self.formulate_logged_event(
+    #                 slot_time,
+    #                 tag_,
+    #                 result,
+    #                 instance_address,
+    #                 event,
+    #                 height,
+    #                 tx_hash,
+    #                 tx_index,
+    #                 ordering,
+    #                 _id_postfix,
+    #             )
 
-        return tag_, logged_event, logged_event_for_queue, token_address
+    #     return tag_, logged_event, logged_event_for_queue, token_address
 
     ###############
 
@@ -843,6 +967,7 @@ class CIS:
 
         return support_result, ii
 
+    # CIS Components
     def account_address(self, bs: io.BytesIO):
         addr = bs.read(32)
         return base58.b58encode_check(b"\x01" + addr).decode()
@@ -894,9 +1019,10 @@ class CIS:
         return MetadataUrl(**{"url": url, "checksum": checksum})
 
     def schema_ref(self, bs: io.BytesIO):
-        n = int.from_bytes(bs.read(2), byteorder="little")
-        url = bs.read(n).decode()
-        return SchemaRef(**{"url": url, "checksum": None})
+        metadata_url_proxy = self.metadataUrl(bs)
+        return SchemaRef(
+            **{"url": metadata_url_proxy.url, "checksum": metadata_url_proxy.checksum}
+        )
 
     def receiveHookName(self, bs: io.BytesIO):
         n = int.from_bytes(bs.read(2), byteorder="little")
@@ -1102,10 +1228,10 @@ class CIS:
         return bytes.hex(bs.read(n))
 
     def status(self, bs: io.BytesIO):
-        return bytes.hex(bs.read(1))
+        return int.from_bytes(bs.read(1), byteorder="little")
 
     def nonce(self, bs: io.BytesIO):
-        return bytes.hex(bs.read(8))
+        return int.from_bytes(bs.read(8), byteorder="little")
 
     def token_amount(self, bs: io.BytesIO):
         return leb128.u.decode_reader(bs)[0]
@@ -1139,6 +1265,18 @@ class CIS:
             reason_string_ = self.reason_string(bs)
             return reason_string_
 
+    def signature_ed25519(self, bs: io.BytesIO) -> str:
+        return bytes.hex(bs.read(64))
+
+    def genesis_hash(self, bs: io.BytesIO) -> str:
+        return bytes.hex(bs.read(32))
+
+    def chain_context(self, bs: io.BytesIO):
+        genesis_hash_ = self.genesis_hash(bs)
+        contract_index_ = self.contract_index(bs)
+        contract_subindex_ = self.contract_subindex(bs)
+        return genesis_hash_, contract_index_, contract_subindex_
+
     def revocation_key_action(self, bs: io.BytesIO):
         n = int.from_bytes(bs.read(1), byteorder="little")
         if n == 0:
@@ -1149,9 +1287,16 @@ class CIS:
     def ccd_amount(self, bs: io.BytesIO) -> int:
         return int.from_bytes(bs.read(8), byteorder="little")
 
+    def contract_index(self, bs: io.BytesIO) -> str:
+        return bytes.hex(bs.read(8))
+
+    def contract_subindex(self, bs: io.BytesIO) -> str:
+        return bytes.hex(bs.read(8))
+
     def public_key_ed25519(self, bs: io.BytesIO) -> str:
         return bytes.hex(bs.read(32))
 
+    # CIS events
     def transferEvent(self, hexParameter: str):
         bs = io.BytesIO(bytes.fromhex(hexParameter))
 
@@ -1160,21 +1305,24 @@ class CIS:
         amount_ = self.token_amount(bs)
 
         from_ = self.address(bs)
-        if type(from_) is not tuple:
-            # it's an account address
-            if len(from_) != LEN_ACCOUNT_ADDRESS:
-                return None
+        from_ = self.format_address(from_)
 
-        if type(from_) == tuple:
-            from_ = f"<{from_[0]},{from_[1]}>"
+        # if type(from_) is not tuple:
+        #     # it's an account address
+        #     if len(from_) != LEN_ACCOUNT_ADDRESS:
+        #         return None
+
+        # if type(from_) == tuple:
+        #     from_ = f"<{from_[0]},{from_[1]}>"
         to_ = self.address(bs)
-        if type(to_) is not tuple:
-            # it's an account address
-            if len(to_) != LEN_ACCOUNT_ADDRESS:
-                return None
+        to_ = self.format_address(to_)
+        # if type(to_) is not tuple:
+        #     # it's an account address
+        #     if len(to_) != LEN_ACCOUNT_ADDRESS:
+        #         return None
 
-        if type(to_) == tuple:
-            to_ = f"<{to_[0]},{to_[1]}>"
+        # if type(to_) == tuple:
+        #     to_ = f"<{to_[0]},{to_[1]}>"
 
         return transferEvent(
             **{
@@ -1194,21 +1342,23 @@ class CIS:
         update_ = self.operator_update(bs)
 
         owner_ = self.address(bs)
-        if type(owner_) is not tuple:
-            # it's an account address
-            if len(owner_) != LEN_ACCOUNT_ADDRESS:
-                return None
+        owner_ = self.format_address(owner_)
+        # if type(owner_) is not tuple:
+        #     # it's an account address
+        #     if len(owner_) != LEN_ACCOUNT_ADDRESS:
+        #         return None
 
-        if type(owner_) == tuple:
-            owner_ = f"<{owner_[0]},{owner_[1]}>"
+        # if type(owner_) == tuple:
+        #     owner_ = f"<{owner_[0]},{owner_[1]}>"
         operator_ = self.address(bs)
-        if type(operator_) is not tuple:
-            # it's an account address
-            if len(operator_) != LEN_ACCOUNT_ADDRESS:
-                return None
+        operator_ = self.format_address(operator_)
+        # if type(operator_) is not tuple:
+        #     # it's an account address
+        #     if len(operator_) != LEN_ACCOUNT_ADDRESS:
+        #         return None
 
-        if type(operator_) == tuple:
-            operator_ = f"<{operator_[0]},{operator_[1]}>"
+        # if type(operator_) == tuple:
+        #     operator_ = f"<{operator_[0]},{operator_[1]}>"
 
         return updateOperatorEvent(
             **{
@@ -1226,13 +1376,14 @@ class CIS:
         token_id_ = self.token_id(bs)
         amount_ = self.token_amount(bs)
         to_ = self.address(bs)
-        if type(to_) is not tuple:
-            # it's an account address
-            if len(to_) != LEN_ACCOUNT_ADDRESS:
-                return None
+        to_ = self.format_address(to_)
+        # if type(to_) is not tuple:
+        #     # it's an account address
+        #     if len(to_) != LEN_ACCOUNT_ADDRESS:
+        #         return None
 
-        if type(to_) == tuple:
-            to_ = f"<{to_[0]},{to_[1]}>"
+        # if type(to_) == tuple:
+        #     to_ = f"<{to_[0]},{to_[1]}>"
 
         return mintEvent(
             **{
@@ -1250,13 +1401,14 @@ class CIS:
         token_id_ = self.token_id(bs)
         amount_ = self.token_amount(bs)
         from_ = self.address(bs)
-        if type(from_) is not tuple:
-            # it's an account address
-            if len(from_) != LEN_ACCOUNT_ADDRESS:
-                return None
+        from_ = self.format_address(from_)
+        # if type(from_) is not tuple:
+        #     # it's an account address
+        #     if len(from_) != LEN_ACCOUNT_ADDRESS:
+        #         return None
 
-        if type(from_) == tuple:
-            from_ = f"<{from_[0]},{from_[1]}>"
+        # if type(from_) == tuple:
+        #     from_ = f"<{from_[0]},{from_[1]}>"
 
         return burnEvent(
             **{
@@ -1283,7 +1435,7 @@ class CIS:
             }
         )
 
-    def nonceEvent(self, hexParameter: str):
+    def nonceEvent(self, hexParameter: str) -> nonceEvent:
         bs = io.BytesIO(bytes.fromhex(hexParameter))
 
         tag_ = int.from_bytes(bs.read(1), byteorder="little")
@@ -1294,7 +1446,9 @@ class CIS:
         return nonceEvent(
             **{
                 "tag": tag_,
-                "nonce": nonce_,
+                "nonce": str(
+                    nonce_
+                ),  # to cover for strangely large nonces being bounced by Mongo.
                 "sponsoree": sponsoree_,
             }
         )
@@ -1377,11 +1531,13 @@ class CIS:
         bs = io.BytesIO(bytes.fromhex(hexParameter))
 
         tag_ = int.from_bytes(bs.read(1), byteorder="little")
+        public_key_ = self.public_key_ed25519(bs)
         action = self.revocation_key_action(bs)
 
         return revocationKeyEvent(
             **{
                 "tag": tag_,
+                "public_key_ed25519": public_key_,
                 "action": action,
             }
         )
@@ -1405,6 +1561,42 @@ class CIS:
         )
 
     def ItemStatusChangedEvent(self, hexParameter: str):
+        bs = io.BytesIO(bytes.fromhex(hexParameter))
+
+        tag_ = int.from_bytes(bs.read(1), byteorder="little")
+
+        item_id_ = self.item_id(bs)
+        new_status_ = self.status(bs)
+        additional_data_ = self.additionalData(bs)
+
+        return itemStatusChangedEvent(
+            **{
+                "tag": tag_,
+                "item_id": item_id_,
+                "new_status": new_status_,
+                "additional_data": additional_data_,
+            }
+        )
+
+    def itemCreatedEvent(self, hexParameter: str):
+        bs = io.BytesIO(bytes.fromhex(hexParameter))
+
+        tag_ = int.from_bytes(bs.read(1), byteorder="little")
+
+        item_id_ = self.item_id(bs)
+        metadata_ = self.metadataUrl(bs)
+        initial_status_ = self.status(bs)
+
+        return itemCreatedEvent(
+            **{
+                "tag": tag_,
+                "item_id": item_id_,
+                "metadata": metadata_,
+                "initial_status": initial_status_,
+            }
+        )
+
+    def itemStatusChangedEvent(self, hexParameter: str):
         bs = io.BytesIO(bytes.fromhex(hexParameter))
 
         tag_ = int.from_bytes(bs.read(1), byteorder="little")
@@ -1519,3 +1711,370 @@ class CIS:
                 return tag_, None
         else:
             return tag_, f"Custom even with tag={tag_}."
+
+    def depositCCDEvent(self, hexParameter: str):
+        bs = io.BytesIO(bytes.fromhex(hexParameter))
+
+        tag_ = int.from_bytes(bs.read(1), byteorder="little")
+        ccd_amount_ = self.ccd_amount(bs)
+        address_ = self.address(bs)
+        to_ = self.public_key_ed25519(bs)
+        address_ = self.format_address(address_)
+
+        return depositCCDEvent(
+            **{
+                "tag": tag_,
+                "ccd_amount": ccd_amount_,
+                "from_address": address_,
+                "to_public_key_ed25519": to_,
+            }
+        )
+
+    def depositCIS2TokensEvent(self, hexParameter: str):
+        bs = io.BytesIO(bytes.fromhex(hexParameter))
+
+        tag_ = int.from_bytes(bs.read(1), byteorder="little")
+        token_amount_ = self.token_amount(bs)
+        token_id_ = self.token_id(bs)
+        cis2_token_contract_address_ = self.contract_address(bs)
+        from_ = self.address(bs)
+        from_ = self.format_address(from_)
+        to_ = self.public_key_ed25519(bs)
+
+        # transform contract_address into string
+        cis2_token_contract_address_str = CCD_ContractAddress.from_index(
+            cis2_token_contract_address_[0], cis2_token_contract_address_[1]
+        ).to_str()
+
+        return depositCIS2TokensEvent(
+            **{
+                "tag": tag_,
+                "token_amount": token_amount_,
+                "token_id": token_id_,
+                "cis2_token_contract_address": cis2_token_contract_address_str,
+                "from_address": from_,
+                "to_public_key_ed25519": to_,
+            }
+        )
+
+    def withdrawCCDEvent(self, hexParameter: str):
+        bs = io.BytesIO(bytes.fromhex(hexParameter))
+
+        tag_ = int.from_bytes(bs.read(1), byteorder="little")
+        ccd_amount_ = self.ccd_amount(bs)
+        from_ = self.public_key_ed25519(bs)
+        to_ = self.address(bs)
+        to_ = self.format_address(to_)
+
+        return withdrawCCDEvent(
+            **{
+                "tag": tag_,
+                "ccd_amount": ccd_amount_,
+                "from_public_key_ed25519": from_,
+                "to_address": to_,
+            }
+        )
+
+    def withdrawCIS2TokensEvent(self, hexParameter: str):
+        bs = io.BytesIO(bytes.fromhex(hexParameter))
+
+        tag_ = int.from_bytes(bs.read(1), byteorder="little")
+        token_amount_ = self.token_amount(bs)
+        token_id_ = self.token_id(bs)
+        cis2_token_contract_address_ = self.contract_address(bs)
+        from_ = self.public_key_ed25519(bs)
+        to_ = self.address(bs)
+        to_ = self.format_address(to_)
+
+        # transform contract_address into string
+        cis2_token_contract_address_str = CCD_ContractAddress.from_index(
+            cis2_token_contract_address_[0], cis2_token_contract_address_[1]
+        ).to_str()
+
+        return withdrawCIS2TokensEvent(
+            **{
+                "tag": tag_,
+                "token_amount": token_amount_,
+                "token_id": token_id_,
+                "cis2_token_contract_address": cis2_token_contract_address_str,
+                "from_public_key_ed25519": from_,
+                "to_address": to_,
+            }
+        )
+
+    def transferCCDEvent(self, hexParameter: str):
+        bs = io.BytesIO(bytes.fromhex(hexParameter))
+
+        tag_ = int.from_bytes(bs.read(1), byteorder="little")
+        ccd_amount_ = self.ccd_amount(bs)
+        from_ = self.public_key_ed25519(bs)
+        to_ = self.public_key_ed25519(bs)
+
+        return transferCCDEvent(
+            **{
+                "tag": tag_,
+                "ccd_amount": ccd_amount_,
+                "from_public_key_ed25519": from_,
+                "to_public_key_ed25519": to_,
+            }
+        )
+
+    def transferCIS2TokensEvent(self, hexParameter: str):
+        bs = io.BytesIO(bytes.fromhex(hexParameter))
+
+        tag_ = int.from_bytes(bs.read(1), byteorder="little")
+        token_amount_ = self.token_amount(bs)
+        token_id_ = self.token_id(bs)
+        cis2_token_contract_address_ = self.contract_address(bs)
+        from_ = self.public_key_ed25519(bs)
+        to_ = self.public_key_ed25519(bs)
+
+        # transform contract_address into string
+        cis2_token_contract_address_str = CCD_ContractAddress.from_index(
+            cis2_token_contract_address_[0], cis2_token_contract_address_[1]
+        ).to_str()
+
+        return transferCIS2TokensEvent(
+            **{
+                "tag": tag_,
+                "token_amount": token_amount_,
+                "token_id": token_id_,
+                "cis2_token_contract_address": cis2_token_contract_address_str,
+                "from_public_key_ed25519": from_,
+                "to_public_key_ed25519": to_,
+            }
+        )
+
+    # Recognize event
+    def recognize_event(self, event: str, standards: list[StandardIdentifiers]):
+        """
+        Contracts can support multiple standards. Hence, depending on the tag we try
+        to figure our which standard such an event is specified in and try to parse it.
+        """
+        bs = io.BytesIO(bytes.fromhex(event))
+        tag_ = int.from_bytes(bs.read(1), byteorder="little")
+        if StandardIdentifiers.CIS_2 in standards:
+            if tag_ == 255:
+                try:
+                    event = self.transferEvent(event)
+                    return (
+                        tag_,
+                        event,
+                        "CIS-2.transfer_event",
+                        StandardIdentifiers.CIS_2,
+                    )
+                except:  # noqa: E722
+                    return tag_, None, None, None
+            elif tag_ == 254:
+                try:
+                    event = self.mintEvent(event)
+                    return tag_, event, "CIS-2.mint_event", StandardIdentifiers.CIS_2
+                except:  # noqa: E722
+                    return tag_, None, None, None
+            elif tag_ == 253:
+                try:
+                    event = self.burnEvent(event)
+                    return tag_, event, "CIS-2.burn_event", StandardIdentifiers.CIS_2
+                except:  # noqa: E722
+                    return tag_, None, None, None
+            elif tag_ == 252:
+                try:
+                    event = self.updateOperatorEvent(event)
+                    return (
+                        tag_,
+                        event,
+                        "CIS-2.operator_event",
+                        StandardIdentifiers.CIS_2,
+                    )
+                except:  # noqa: E722
+                    return tag_, None, None, None
+            elif tag_ == 251:
+                try:
+                    event = self.tokenMetaDataEvent(event)
+                    return (
+                        tag_,
+                        event,
+                        "CIS-2.metadata_event",
+                        StandardIdentifiers.CIS_2,
+                    )
+                except:  # noqa: E722
+                    return tag_, None, None, None
+        if StandardIdentifiers.CIS_3 in standards:
+            if tag_ == 250:
+                try:
+                    event = self.nonceEvent(event)
+                    return tag_, event, "CIS-3.nonce_event", StandardIdentifiers.CIS_3
+                except:  # noqa: E722
+                    return tag_, None, None, None
+        if StandardIdentifiers.CIS_4 in standards:
+            if tag_ == 249:
+                try:
+                    event = self.registerCredentialEvent(event)
+                    return (
+                        tag_,
+                        event,
+                        "CIS-4.register_credential_event",
+                        StandardIdentifiers.CIS_4,
+                    )
+                except:  # noqa: E722
+                    return tag_, None, None, None
+            elif tag_ == 248:
+                try:
+                    event = self.revokeCredentialEvent(event)
+                    return (
+                        tag_,
+                        event,
+                        "CIS-4.revoke_credential_event",
+                        StandardIdentifiers.CIS_4,
+                    )
+                except:  # noqa: E722
+                    return tag_, None, None, None
+            elif tag_ == 247:
+                try:
+                    event = self.issuerMetaDataEvent(event)
+                    return (
+                        tag_,
+                        event,
+                        "CIS-4.issuer_metadata_event",
+                        StandardIdentifiers.CIS_4,
+                    )
+                except:  # noqa: E722
+                    return tag_, None, None, None
+            elif tag_ == 246:
+                try:
+                    event = self.credentialMetaDataEvent(event)
+                    return (
+                        tag_,
+                        event,
+                        "CIS-4.credential_metadata_event",
+                        StandardIdentifiers.CIS_4,
+                    )
+                except:  # noqa: E722
+                    return tag_, None, None, None
+            elif tag_ == 245:
+                try:
+                    event = self.credentialSchemaRefEvent(event)
+                    return (
+                        tag_,
+                        event,
+                        "CIS-4.credential_schemaref_event",
+                        StandardIdentifiers.CIS_4,
+                    )
+                except:  # noqa: E722
+                    return tag_, None, None, None
+            elif tag_ == 244:
+                try:
+                    event = self.revocationKeyEvent(event)
+                    return (
+                        tag_,
+                        event,
+                        "CIS-4.recovation_key_event",
+                        StandardIdentifiers.CIS_4,
+                    )
+                except:  # noqa: E722
+                    return tag_, None, None, None
+        if StandardIdentifiers.CIS_5 in standards:
+            if tag_ == 250:
+                try:
+                    event = self.nonceEvent(event)
+                    return tag_, event, "CIS-5.nonce_event", StandardIdentifiers.CIS_5
+                except:  # noqa: E722
+                    return tag_, None, None, None
+            elif tag_ == 249:
+                try:
+                    event = self.depositCCDEvent(event)
+                    return (
+                        tag_,
+                        event,
+                        "CIS-5.deposit_ccd_event",
+                        StandardIdentifiers.CIS_5,
+                    )
+                except:  # noqa: E722
+                    return tag_, None, None, None
+            elif tag_ == 248:
+                try:
+                    event = self.depositCIS2TokensEvent(event)
+                    return (
+                        tag_,
+                        event,
+                        "CIS-5.deposit_cis2_tokens_event",
+                        StandardIdentifiers.CIS_5,
+                    )
+                except:  # noqa: E722
+                    return tag_, None, None, None
+            elif tag_ == 247:
+                try:
+                    event = self.withdrawCCDEvent(event)
+                    return (
+                        tag_,
+                        event,
+                        "CIS-5.withdraw_ccd_event",
+                        StandardIdentifiers.CIS_5,
+                    )
+                except:  # noqa: E722
+                    return tag_, None, None, None
+            elif tag_ == 246:
+                try:
+                    event = self.withdrawCIS2TokensEvent(event)
+                    return (
+                        tag_,
+                        event,
+                        "CIS-5.withdraw_cis2_tokens_event",
+                        StandardIdentifiers.CIS_5,
+                    )
+                except:  # noqa: E722
+                    return tag_, None, None, None
+            elif tag_ == 245:
+                try:
+                    event = self.transferCCDEvent(event)
+                    return (
+                        tag_,
+                        event,
+                        "CIS-5.transfer_ccd_event",
+                        StandardIdentifiers.CIS_5,
+                    )
+                except:  # noqa: E722
+                    return tag_, None, None, None
+            elif tag_ == 244:
+                try:
+                    event = self.transferCIS2TokensEvent(event)
+                    return (
+                        tag_,
+                        event,
+                        "CIS-5.transfer_cis2_tokens_event",
+                        StandardIdentifiers.CIS_5,
+                    )
+                except:  # noqa: E722
+                    return tag_, None, None, None
+        if StandardIdentifiers.CIS_6 in standards:
+            if tag_ == 237:
+                try:
+                    event = self.itemCreatedEvent(event)
+                    return (
+                        tag_,
+                        event,
+                        "CIS-6.item_created_event",
+                        StandardIdentifiers.CIS_6,
+                    )
+                except:  # noqa: E722
+                    return tag_, None, None, None
+            elif tag_ == 236:
+                try:
+                    event = self.itemStatusChangedEvent(event)
+                    return (
+                        tag_,
+                        event,
+                        "CIS-6.item_status_changed_event",
+                        StandardIdentifiers.CIS_6,
+                    )
+                except:  # noqa: E722
+                    return tag_, None, None, None
+            else:
+                return (
+                    tag_,
+                    None,
+                    None,
+                    None,
+                )
+        else:
+            return tag_, None, None, None
