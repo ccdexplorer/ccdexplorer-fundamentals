@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import io
 from enum import Enum
-from typing import Optional, Any
+from typing import Optional, Any, Union
 
 import base58
 import leb128
@@ -692,65 +692,65 @@ class CIS:
             )
             # exit
 
-    # def formulate_logged_event(
-    #     self,
-    #     slot_time: dt.datetime,
-    #     tag_: int,
-    #     result: Union[
-    #         mintEvent, burnEvent, transferEvent, updateOperatorEvent, tokenMetadataEvent
-    #     ],
-    #     instance_address: str,
-    #     event: str,
-    #     height: int,
-    #     tx_hash: str,
-    #     tx_index: int,
-    #     ordering: int,
-    #     _id_postfix: str,
-    # ) -> Union[ReplaceOne, None]:
-    #     if tag_ in [255, 254, 253, 252, 251, 250]:
-    #         if tag_ == 252:
-    #             token_address = f"{instance_address}-operator"
-    #         elif tag_ == 250:
-    #             token_address = f"{instance_address}-nonce"
-    #         else:
-    #             token_address = f"{instance_address}-{result.token_id}"
-    #         _id = f"{height}-{token_address}-{event}-{_id_postfix}"
-    #         if result:
-    #             result_dict = result.model_dump()
-    #         else:
-    #             result_dict = {}
-    #         if "token_amount" in result_dict:
-    #             result_dict["token_amount"] = str(result_dict["token_amount"])
+    def formulate_logged_event(
+        self,
+        slot_time: dt.datetime,
+        tag_: int,
+        result: Union[
+            mintEvent, burnEvent, transferEvent, updateOperatorEvent, tokenMetadataEvent
+        ],
+        instance_address: str,
+        event: str,
+        height: int,
+        tx_hash: str,
+        tx_index: int,
+        ordering: int,
+        _id_postfix: str,
+    ) -> Union[ReplaceOne, None]:
+        if tag_ in [255, 254, 253, 252, 251, 250]:
+            if tag_ == 252:
+                token_address = f"{instance_address}-operator"
+            elif tag_ == 250:
+                token_address = f"{instance_address}-nonce"
+            else:
+                token_address = f"{instance_address}-{result.token_id}"
+            _id = f"{height}-{token_address}-{event}-{_id_postfix}"
+            if result:
+                result_dict = result.model_dump()
+            else:
+                result_dict = {}
+            if "token_amount" in result_dict:
+                result_dict["token_amount"] = str(result_dict["token_amount"])
 
-    #         d = {
-    #             "_id": _id,
-    #             "logged_event": event,
-    #             "result": result_dict,
-    #             "tag": tag_,
-    #             "event_type": LoggedEvents(tag_).name,
-    #             "block_height": height,
-    #             "tx_hash": tx_hash,
-    #             "tx_index": tx_index,
-    #             "ordering": ordering,
-    #             "token_address": token_address,
-    #             "contract": instance_address,
-    #             "date": f"{slot_time:%Y-%m-%d}",
-    #         }
-    #         if "to_address" in result_dict:
-    #             d.update({"to_address_canonical": result_dict["to_address"][:29]})
-    #         if "from_address" in result_dict:
-    #             d.update({"from_address_canonical": result_dict["from_address"][:29]})
-    #         return (
-    #             MongoTypeLoggedEvent(**d),
-    #             ReplaceOne(
-    #                 {"_id": _id},
-    #                 replacement=d,
-    #                 upsert=True,
-    #             ),
-    #         )
+            d = {
+                "_id": _id,
+                "logged_event": event,
+                "result": result_dict,
+                "tag": tag_,
+                "event_type": LoggedEvents(tag_).name,
+                "block_height": height,
+                "tx_hash": tx_hash,
+                "tx_index": tx_index,
+                "ordering": ordering,
+                "token_address": token_address,
+                "contract": instance_address,
+                "date": f"{slot_time:%Y-%m-%d}",
+            }
+            if "to_address" in result_dict:
+                d.update({"to_address_canonical": result_dict["to_address"][:29]})
+            if "from_address" in result_dict:
+                d.update({"from_address_canonical": result_dict["from_address"][:29]})
+            return (
+                MongoTypeLoggedEvent(**d),
+                ReplaceOne(
+                    {"_id": _id},
+                    replacement=d,
+                    upsert=True,
+                ),
+            )
 
-    #     else:
-    #         return (None, None)
+        else:
+            return (None, None)
 
     # # not used
     # def execute_logged_event(
@@ -777,40 +777,40 @@ class CIS:
     #     elif tag_ == 250:
     #         pass  # nonceEvent
 
-    # def process_event(
-    #     self,
-    #     slot_time: dt.datetime,
-    #     instance_address: str,
-    #     event: str,
-    #     height: int,
-    #     tx_hash: str,
-    #     tx_index: int,
-    #     ordering: int,
-    #     _id_postfix: str,
-    # ):
-    #     tag_, result = self.process_log_events(event)
-    #     logged_event = None
-    #     logged_event_for_queue = None
-    #     token_address = None
-    #     if result:
-    #         # if tag_ in [255, 254, 253, 252, 251, 250]:
-    #         if tag_ in [255, 254, 253, 251]:
-    #             token_address = f"{instance_address}-{result.token_id}"
+    def process_event(
+        self,
+        slot_time: dt.datetime,
+        instance_address: str,
+        event: str,
+        height: int,
+        tx_hash: str,
+        tx_index: int,
+        ordering: int,
+        _id_postfix: str,
+    ):
+        tag_, result = self.process_log_events(event)
+        logged_event = None
+        logged_event_for_queue = None
+        token_address = None
+        if result:
+            # if tag_ in [255, 254, 253, 252, 251, 250]:
+            if tag_ in [255, 254, 253, 251]:
+                token_address = f"{instance_address}-{result.token_id}"
 
-    #             (logged_event, logged_event_for_queue) = self.formulate_logged_event(
-    #                 slot_time,
-    #                 tag_,
-    #                 result,
-    #                 instance_address,
-    #                 event,
-    #                 height,
-    #                 tx_hash,
-    #                 tx_index,
-    #                 ordering,
-    #                 _id_postfix,
-    #             )
+                (logged_event, logged_event_for_queue) = self.formulate_logged_event(
+                    slot_time,
+                    tag_,
+                    result,
+                    instance_address,
+                    event,
+                    height,
+                    tx_hash,
+                    tx_index,
+                    ordering,
+                    _id_postfix,
+                )
 
-    #     return tag_, logged_event, logged_event_for_queue, token_address
+        return tag_, logged_event, logged_event_for_queue, token_address
 
     ###############
 
