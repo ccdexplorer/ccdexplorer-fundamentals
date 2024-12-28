@@ -861,7 +861,10 @@ class CIS:
             for _ in range(n):
                 responses.append(self.support_result(bs))
             if len(responses) > 0:
-                return responses[0]
+                if responses[0] is not None:
+                    return responses[0]
+                else:
+                    return False, "Lookup Failure"
             else:
                 return False, "Lookup Failure"
         else:
@@ -901,7 +904,7 @@ class CIS:
             )
 
             res = ii.success.return_value
-            support_result, support_result_text = self.supports_response(res)
+            support_result, _ = self.supports_response(res)
 
             support = support_result == 1
         return support
