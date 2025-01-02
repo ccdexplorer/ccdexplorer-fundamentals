@@ -42,15 +42,15 @@ class MongoTypeTokenLink(BaseModel):
     token_holding: Optional[MongoTypeTokenForAddress] = None
 
 
-class MongoTypeTokenLinkV2(BaseModel):
-    model_config = ConfigDict(coerce_numbers_to_str=True)
-    id: str = Field(..., alias="_id")
-    account_address: str
-    account_address_canonical: str
-    token_address: str
-    contract: str
-    token_id: str
-    token_amount: 0
+# class MongoTypeTokenLinkV2(BaseModel):
+#     model_config = ConfigDict(coerce_numbers_to_str=True)
+#     id: str = Field(..., alias="_id")
+#     account_address: str
+#     account_address_canonical: str
+#     token_address: str
+#     contract: str
+#     token_id: str
+#     token_amount: 0
 
 
 class MongoTypeTokenHolderAddress(BaseModel):
