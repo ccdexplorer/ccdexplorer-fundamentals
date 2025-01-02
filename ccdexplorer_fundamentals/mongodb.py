@@ -364,6 +364,7 @@ class Collections(Enum):
     dashboard_nodes = "dashboard_nodes"
     tokens_accounts = "tokens_accounts"
     tokens_links_v2 = "tokens_links_v2"
+    tokens_links_v3 = "tokens_links_v3"
     tokens_token_addresses_v2 = "tokens_token_addresses_v2"
     tokens_tags = "tokens_tags"
     tokens_logged_events = "tokens_logged_events"

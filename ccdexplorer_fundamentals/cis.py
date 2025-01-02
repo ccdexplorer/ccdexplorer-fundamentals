@@ -42,6 +42,17 @@ class MongoTypeTokenLink(BaseModel):
     token_holding: Optional[MongoTypeTokenForAddress] = None
 
 
+class MongoTypeTokenLinkV2(BaseModel):
+    model_config = ConfigDict(coerce_numbers_to_str=True)
+    id: str = Field(..., alias="_id")
+    account_address: str
+    account_address_canonical: str
+    token_address: str
+    contract: str
+    token_id: str
+    token_amount: 0
+
+
 class MongoTypeTokenHolderAddress(BaseModel):
     id: str = Field(..., alias="_id")
     account_address_canonical: Optional[str] = None
@@ -101,6 +112,21 @@ class MongoTypeTokenAddress(BaseModel):
     tag_information: Optional[MongoTypeTokensTag] = None
     exchange_rate: Optional[float] = None
     domain_name: Optional[str] = None
+    token_metadata: Optional[TokenMetaData] = None
+    failed_attempt: Optional[FailedAttempt] = None
+    hidden: Optional[bool] = None
+
+
+class MongoTypeTokenAddressV2(BaseModel):
+    id: str = Field(..., alias="_id")
+    contract: str
+    token_id: str
+    token_amount: Optional[str] = None
+    metadata_url: Optional[str] = None
+    last_height_processed: int
+    tag_information: Optional[MongoTypeTokensTag] = None
+    exchange_rate: Optional[float] = None
+    # domain_name: Optional[str] = None
     token_metadata: Optional[TokenMetaData] = None
     failed_attempt: Optional[FailedAttempt] = None
     hidden: Optional[bool] = None
