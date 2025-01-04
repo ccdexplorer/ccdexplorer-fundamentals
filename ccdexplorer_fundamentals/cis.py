@@ -1150,7 +1150,12 @@ class CIS:
 
     def generate_tokenID(self, tokenID: str):
         sp = io.BytesIO()
-        tokenID_in_bytes = bytes.fromhex(tokenID)
+        try:
+            int(tokenID, 16)
+            tokenID_in_bytes = bytes.fromhex(tokenID)
+        except ValueError:
+            tokenID_in_bytes = str.encode(tokenID)
+
         sp.write(int(len(tokenID_in_bytes)).to_bytes(1, "little"))
         sp.write(tokenID_in_bytes)
         return sp.getvalue()
