@@ -7,7 +7,7 @@ import os
 sys.path.append(os.path.dirname("ccdexplorer_fundamentals"))
 from ccdexplorer_fundamentals.GRPCClient.service_pb2_grpc import QueriesStub
 from ccdexplorer_fundamentals.env import GRPC_MAINNET, GRPC_TESTNET
-
+from ccdexplorer_fundamentals.tooter import Tooter, TooterChannel, TooterType
 from ccdexplorer_fundamentals.GRPCClient.types_pb2 import *
 import grpc
 from ccdexplorer_fundamentals.enums import NET
@@ -229,3 +229,25 @@ class GRPCClient(
                 if self.host_index[net] == len(self.hosts[net]):
                     self.host_index[net] = 0
                 self.connect()
+
+    def connection_info(self, caller: str, tooter: Tooter, ADMIN_CHAT_ID: int) -> None:
+        message = f"<code>{caller}</code> connection status\n<code>mainnet</code> - {self.hosts[NET.MAINNET][self.host_index[NET.MAINNET]]['host']}:{self.hosts[NET.MAINNET][self.host_index[NET.MAINNET]]['port']}\n<code>testnet</code> - {self.hosts[NET.TESTNET][self.host_index[NET.TESTNET]]['host']}:{self.hosts[NET.TESTNET][self.host_index[NET.TESTNET]]['port']}\n"
+        tooter.relay(
+            channel=TooterChannel.NOTIFIER,
+            title="",
+            chat_id=ADMIN_CHAT_ID,
+            body=message,
+            notifier_type=TooterType.INFO,
+        )
+
+    async def aconnection_info(
+        self, caller: str, tooter: Tooter, ADMIN_CHAT_ID: int
+    ) -> None:
+        message = f"<code>{caller}</code> connection status\n<code>mainnet</code> - {self.hosts[NET.MAINNET][self.host_index[NET.MAINNET]]['host']}:{self.hosts[NET.MAINNET][self.host_index[NET.MAINNET]]['port']}\n<code>testnet</code> - {self.hosts[NET.TESTNET][self.host_index[NET.TESTNET]]['host']}:{self.hosts[NET.TESTNET][self.host_index[NET.TESTNET]]['port']}\n"
+        tooter.relay(
+            channel=TooterChannel.NOTIFIER,
+            title="",
+            chat_id=ADMIN_CHAT_ID,
+            body=message,
+            notifier_type=TooterType.INFO,
+        )
