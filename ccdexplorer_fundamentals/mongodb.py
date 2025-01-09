@@ -166,11 +166,12 @@ class MongoTypeInvolvedContract(BaseModel):
 
 class ModuleVerification(BaseModel):
     verified: bool
-    build_image_used: str
-    build_command_used: str
-    archive_hash: str
-    link_to_source_code: str
-    source_code_at_verification_time: str
+    verification_timestamp: dt.datetime
+    build_image_used: Optional[str] = None
+    build_command_used: Optional[str] = None
+    archive_hash: Optional[str] = None
+    link_to_source_code: Optional[str] = None
+    source_code_at_verification_time: Optional[str] = None
 
 
 class MongoTypeModule(BaseModel):
