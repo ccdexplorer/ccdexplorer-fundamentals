@@ -382,6 +382,7 @@ class Collections(Enum):
     statistics = "statistics"
     pre_render = "pre_render"
     cis5_public_keys_contracts = "cis5_public_keys_contracts"
+    cis5_public_keys_info = "cis5_public_keys_info"
 
     # addresses and contracts per net per usecase
     projects = "projects"
