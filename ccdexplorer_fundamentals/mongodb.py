@@ -167,6 +167,7 @@ class MongoTypeInvolvedContract(BaseModel):
 class ModuleVerification(BaseModel):
     verified: bool
     verification_timestamp: dt.datetime
+    explanation: Optional[str] = None
     build_image_used: Optional[str] = None
     build_command_used: Optional[str] = None
     archive_hash: Optional[str] = None
@@ -208,6 +209,7 @@ class MongoTypeInstance(BaseModel):
     v0: Optional[CCD_InstanceInfo_V0] = None  # noqa: F405
     v1: Optional[CCD_InstanceInfo_V1] = None  # noqa: F405
     source_module: Optional[str] = None
+    module_verified: Optional[bool] = None
 
 
 class MongoTypeReward(BaseModel):
